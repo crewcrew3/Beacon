@@ -1,33 +1,20 @@
-import java.util.Properties
-
 plugins {
-    alias(libs.plugins.android.application)
+    alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.hilt.plugin)
-    alias(libs.plugins.jetbrains.kotlin.serialization)
 }
 
 android {
-    namespace = "ru.itis.beacon"
+    namespace = "ru.itis.core.ui"
     compileSdk {
         version = release(36)
     }
 
     defaultConfig {
-        applicationId = "ru.itis.beacon"
         minSdk = 26
-        targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        val properties = Properties()
-        rootProject.file("local.properties").inputStream().use { properties.load(it) }
-        val mapkitApiKey = properties.getProperty("MAPKIT_API_KEY", "")
-        buildConfigField("String", "MAPKIT_API_KEY", "\"$mapkitApiKey\"")
+        consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {
@@ -48,27 +35,17 @@ android {
     }
     buildFeatures {
         compose = true
-        buildConfig = true
     }
 }
 
 dependencies {
-    //androidx
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-
     //compose
     implementation(libs.bundles.compose.deps)
     implementation(platform(libs.androidx.compose.bom))
     debugImplementation(libs.androidx.compose.ui.tooling)
-
-    //DI
-    implementation(libs.hilt)
-    ksp(libs.hilt.compiler)
-
-    //навигация
-    implementation(libs.bundles.nav.deps)
-
-    //карты
-    implementation(libs.yandex.maps)
+    //Изображения
+    implementation(libs.bundles.coil.deps)
+    //shimmers
+    implementation(libs.compose.shimmer)
 }
