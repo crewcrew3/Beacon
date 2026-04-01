@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt.plugin)
+    alias(libs.plugins.kotlin.compose)
 }
 
 android {
@@ -28,18 +29,20 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "21"
     }
     buildFeatures {
         viewBinding = true
+        compose = true
     }
 }
 
 dependencies {
+    implementation(projects.feature.map.api)
     implementation(projects.navigation.api)
     implementation(projects.core.ui)
     implementation(projects.core.domain)
@@ -60,4 +63,9 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.yandex.maps)
+
+    //compose
+    implementation(libs.bundles.compose.deps)
+    implementation(platform(libs.androidx.compose.bom))
+    debugImplementation(libs.androidx.compose.ui.tooling)
 }

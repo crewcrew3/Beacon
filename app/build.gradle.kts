@@ -40,11 +40,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "21"
     }
     buildFeatures {
         compose = true
@@ -53,9 +53,19 @@ android {
 }
 
 dependencies {
+    //modules
+    implementation(projects.core.ui)
+    implementation(projects.core.domain)
+    implementation(projects.core.utils)
+    implementation(projects.navigation.impl)
+    implementation(projects.data.impl)
+    implementation(projects.feature.map.api)
+    implementation(projects.feature.map.impl)
+
     //androidx
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.appcompat)
 
     //compose
     implementation(libs.bundles.compose.deps)

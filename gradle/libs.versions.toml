@@ -1,5 +1,5 @@
 [versions]
-agp = "8.13.2"
+agp = "8.13.1"
 kotlin = "2.1.10"
 
 #androidx
@@ -7,14 +7,11 @@ coreKtx = "1.17.0"
 lifecycleRuntimeKtx = "2.10.0"
 
 #compose
-activityCompose = "1.13.0"
-composeBom = "2026.03.01"
+activityCompose = "1.10.1"
+composeBom = "2025.04.01"
 
 #изображения
-coil = "3.4.0"
-
-#корутины
-#coroutinesVersion = "1.10.2"
+coil = "3.3.0"
 
 #аннотации
 kspVersion = "2.1.20-2.0.0"
@@ -33,29 +30,19 @@ hilt = "2.57.2"
 hiltNavComposeVersion = "1.3.0"
 
 #навигация
-nav3Core = "1.0.1"
+nav3Core = "1.0.0"
 lifecycleViewmodelNav3 = "2.10.0"
 kotlinSerialization = "2.0.21"
 kotlinxSerializationCore = "1.8.0"
 
-#tests
-#junit = "4.13.2"
-#mokkVersion = "1.14.7"
-#junitVersion = "1.3.0"
-#espressoCore = "3.7.0"
-
 #прочее
-dataStoreVersion = "1.2.1"
+dataStoreVersion = "1.1.6"
 shimmersVersion = "1.3.3"
-#detekt = "1.23.8"
-#appcompat = "1.6.1"
 constraintlayout = "2.2.0"
-material = "1.13.0"
+material = "1.10.0"
 yandexMaps = "4.33.1-full"
-junit = "4.13.2"
-junitVersion = "1.3.0"
-espressoCore = "3.7.0"
-appcompat = "1.7.1"
+appcompat = "1.6.1"
+#detekt = "1.23.8"
 
 #firebase
 #googleServices = "4.4.4"
@@ -67,11 +54,6 @@ appcompat = "1.7.1"
 #androidx
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
-
-#tests
-#junit = { group = "junit", name = "junit", version.ref = "junit" }
-#mockk = { group = "io.mockk", name = "mockk", version.ref = "mokkVersion" }
-#coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesVersion" }
 
 #compose
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
@@ -85,9 +67,6 @@ androidx-compose-material3 = { group = "androidx.compose.material3", name = "mat
 #изображения
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
 coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
-
-#корутины
-#coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutinesVersion" }
 
 #бд
 room = { group = "androidx.room", name = "room-runtime", version.ref = "roomVersion" }
@@ -115,12 +94,8 @@ kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 #прочее
 datastore-prefs = {group = "androidx.datastore", name = "datastore-preferences", version.ref = "dataStoreVersion"}
 compose-shimmer = {group = "com.valentinilk.shimmer", name = "compose-shimmer", version.ref = "shimmersVersion"}
-#androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 yandex-maps = { group = "com.yandex.android", name = "maps.mobile", version.ref = "yandexMaps" }
-junit = { group = "junit", name = "junit", version.ref = "junit" }
-androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
-androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 
@@ -135,7 +110,6 @@ compose-deps = ["androidx-activity-compose", "androidx-compose-ui", "androidx-co
 #network-deps = ["retrofit", "converter-gson", "gson", "okhttp", "logging-interceptor"]
 coil-deps = ["coil-compose", "coil-network-okhttp"]
 nav-deps = ["androidx-navigation3-runtime", "androidx-navigation3-ui", "androidx-lifecycle-viewmodel-navigation3", "kotlinx-serialization-core", "androidx-hilt-nav-compose"]
-#test-deps = ["junit", "mockk", "coroutines-test"]
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
