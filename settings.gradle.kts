@@ -1,3 +1,4 @@
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 pluginManagement {
     repositories {
         google {
@@ -21,4 +22,11 @@ dependencyResolutionManagement {
 
 rootProject.name = "Beacon"
 include(":app")
- 
+include(":core:domain")
+include(":core:ui")
+include(":core:utils")
+include(":data:impl")
+include(":navigation:api")
+include(":navigation:impl")
+include(":feature:map:api")
+include(":feature:map:impl")

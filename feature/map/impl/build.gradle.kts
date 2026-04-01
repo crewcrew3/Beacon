@@ -1,33 +1,22 @@
-import java.util.Properties
-
 plugins {
-    alias(libs.plugins.android.application)
+    alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt.plugin)
-    alias(libs.plugins.jetbrains.kotlin.serialization)
+    alias(libs.plugins.kotlin.compose)
 }
 
 android {
-    namespace = "ru.itis.beacon"
+    namespace = "ru.itis.feature.map.impl"
     compileSdk {
         version = release(36)
     }
 
     defaultConfig {
-        applicationId = "ru.itis.beacon"
         minSdk = 26
-        targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        val properties = Properties()
-        rootProject.file("local.properties").inputStream().use { properties.load(it) }
-        val mapkitApiKey = properties.getProperty("MAPKIT_API_KEY", "")
-        buildConfigField("String", "MAPKIT_API_KEY", "\"$mapkitApiKey\"")
+        consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {
@@ -47,38 +36,36 @@ android {
         jvmTarget = "21"
     }
     buildFeatures {
+        viewBinding = true
         compose = true
-        buildConfig = true
     }
 }
 
 dependencies {
-    //modules
+    implementation(projects.feature.map.api)
+    implementation(projects.navigation.api)
     implementation(projects.core.ui)
     implementation(projects.core.domain)
     implementation(projects.core.utils)
-    implementation(projects.navigation.impl)
-    implementation(projects.data.impl)
-    implementation(projects.feature.map.api)
-    implementation(projects.feature.map.impl)
 
     //androidx
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.appcompat)
 
-    //compose
-    implementation(libs.bundles.compose.deps)
-    implementation(platform(libs.androidx.compose.bom))
-    debugImplementation(libs.androidx.compose.ui.tooling)
+    //навигация
+    implementation(libs.bundles.nav.deps)
 
     //DI
     implementation(libs.hilt)
     ksp(libs.hilt.compiler)
 
-    //навигация
-    implementation(libs.bundles.nav.deps)
-
-    //карты
+    //ui
+    implementation(libs.material)
+    implementation(libs.androidx.constraintlayout)
     implementation(libs.yandex.maps)
+
+    //compose
+    implementation(libs.bundles.compose.deps)
+    implementation(platform(libs.androidx.compose.bom))
+    debugImplementation(libs.androidx.compose.ui.tooling)
 }
