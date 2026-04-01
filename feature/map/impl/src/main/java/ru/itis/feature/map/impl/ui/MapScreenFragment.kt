@@ -3,6 +3,8 @@ package ru.itis.feature.map.impl.ui
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
+import com.yandex.mapkit.geometry.Point
+import com.yandex.mapkit.map.CameraPosition
 import com.yandex.mapkit.mapview.MapView
 import dagger.hilt.android.AndroidEntryPoint
 import ru.itis.feature.map.impl.R
@@ -23,6 +25,14 @@ class MapScreenFragment : Fragment(R.layout.fragment_map_screen) {
 
         viewBinding.apply {
             mapView = this.mapview
+            mapView.mapWindow.map.move(
+                CameraPosition(
+                    Point(55.751225, 37.62954), //target
+                    10.0f, //zoom
+                    150.0f, //azimuth
+                    0f //tilt
+                )
+            )
         }
     }
 
