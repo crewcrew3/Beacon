@@ -13,7 +13,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.yandex.mapkit.MapKitFactory
 import dagger.hilt.android.AndroidEntryPoint
-import ru.itis.beacon.ui.theme.BeaconTheme
+import ru.itis.core.ui.theme.BeaconTheme
 import ru.itis.feature.map.api.MapScreenNavKey
 import ru.itis.navigation.impl.BackStackHolder
 import javax.inject.Inject

@@ -37,6 +37,7 @@ android {
 }
 
 dependencies {
+    implementation(projects.core.ui)
     //DI
     implementation(libs.hilt)
     ksp(libs.hilt.compiler)

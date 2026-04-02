@@ -1,2 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="app_name">Beacon</string>
+
+    <string name="exception_msg_common">Неизвестная ошибка</string>
+    <string name="exception_msg_bad_request">Неверный ввод данных</string>
+    <string name="exception_msg_not_found">Данные не найдены</string>
+    <string name="exception_msg_forbidden">Доступ запрещен</string>
+    <string name="exception_msg_unauthorized">Требуется авторизация</string>
+    <string name="exception_msg_auth_wrong_credentials">Неверный номер телефона или пароль</string>
+    <string name="exception_msg_user_already_exists">Пользователь с таким номером телефона уже существует</string>
+    <string name="exception_msg_profile">Ошибка получения данных профиля</string>
+    <string name="exception_msg_art_response">Ошибка получения данных</string>
+    <string name="exception_msg_log_out">Ошибка выхода из системы</string>
+
+    <string name="placeholder_text_input">Введите</string>
+    <string name="label_nickname">Никнейм</string>
+    <string name="label_pass">Пароль</string>
+    <string name="label_phone_number">Номер телефона</string>
+    <string name="label_repeat_pass">Повторите пароль</string>
+
+    <string name="auth_screen_phone_num_header">Введите\nномер телефона</string>
+    <string name="auth_screen_pass_header">Введите пароль</string>
+    <string name="profile_screen_unauth">Чтобы продолжить, войдите или зарегистрируйтесь.</string>
+
+    <string name="btn_continue_text">Продолжить</string>
+    <string name="btn_save_text">Сохранить</string>
+    <string name="btn_ok">ОК</string>
+    <string name="btn_cancel">Отмена</string>
+
+    <string name="title_profile">Профиль</string>
+    <string name="top_bar_header_sign_up">Регистрация</string>
+    <string name="top_bar_header_log_in">Вход</string>
+    <string name="registration_screen_header">Зарегистрируйтесь, чтобы получить доступ к большему числу функций</string>
+    <string name="login_screen_header">Войдите в существующий аккаунт, чтобы получить доступ к большему числу функций</string>
+
+    <string name="profile_screen_tab_logout">Выйти</string>
+    <string name="profile_screen_btn_text_login">Войти</string>
+    <string name="profile_screen_btn_text_signup">Зарегистрироваться</string>
+
+    <string name="phone_num_regex">Номер телефона должен быть в формате \"7XXXXXXXXXX\"</string>
+    <string name="nickname_regex">Никнейм не может быть длиннее 25 символов и не может быть пустым</string>
+    <string name="password_name_regex">Пароль должен содержать от 8 до 100 символов</string>
+    <string name="repeat_password_error">Пожалуйста, повторите пароль</string>
+    <string name="not_empty_regex">Это поле не может быть пустым</string>
+
+    <string name="toast_msg_login_successful">Вход выполнен успешно</string>
+    <string name="toast_msg_logout_successful">Выход выполнен успешно</string>
+    <string name="toast_msg_signup_successful">Регистрация прошла успешно</string>
+</resources>
