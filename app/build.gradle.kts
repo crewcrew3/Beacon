@@ -53,14 +53,18 @@ android {
 }
 
 dependencies {
-    //modules
+    //core modules
     implementation(projects.core.ui)
     implementation(projects.core.domain)
     implementation(projects.core.utils)
     implementation(projects.navigation.impl)
     implementation(projects.data.impl)
+    //feature modules
     implementation(projects.feature.map.api)
     implementation(projects.feature.map.impl)
+    implementation(projects.feature.login.impl)
+    implementation(projects.feature.signup.impl)
+    implementation(projects.feature.profile.impl)
 
     //androidx
     implementation(libs.androidx.core.ktx)

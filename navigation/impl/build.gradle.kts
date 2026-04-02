@@ -39,6 +39,9 @@ android {
 dependencies {
     implementation(projects.navigation.api)
     implementation(projects.feature.map.api)
+    implementation(projects.feature.login.api)
+    implementation(projects.feature.signup.api)
+    implementation(projects.feature.profile.api)
 
     implementation(libs.androidx.core.ktx)
     //DI
