@@ -1,6 +1,6 @@
 package ru.itis.data.impl.repository
 
-import ru.itis.core.domain.local.storage.BasicUserDataStorage
+import ru.itis.core.domain.storage.BasicUserDataStorage
 import ru.itis.core.domain.repository.AuthRepository
 import ru.itis.core.utils.properties.ExceptionCode
 import ru.itis.core.utils.properties.OtherProperties

@@ -47,4 +47,6 @@
     <string name="toast_msg_login_successful">Вход выполнен успешно</string>
     <string name="toast_msg_logout_successful">Выход выполнен успешно</string>
     <string name="toast_msg_signup_successful">Регистрация прошла успешно</string>
+    <string name="toast_msg_incident_added">Инцидент успешно добавлен</string>
+    <string name="toast_msg_incident_voited">Вы проголосовали за инцидент</string>
 </resources>
