@@ -7,6 +7,7 @@ import ru.itis.core.ui.R
 @Singleton
 class ExceptionHandler @Inject constructor() {
 
+    /** Сопоставляет ошибкам сообщение, видное пользователю */
     fun getErrorMessage(errorType: OperationResult.ErrorType): Int {
         return when (errorType) {
             is OperationResult.ErrorType.Business -> {

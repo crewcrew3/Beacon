@@ -5,7 +5,8 @@ import androidx.room.*
 @Entity(
     tableName = "verification_actions",
     indices = [
-        Index(value = ["incident_id", "user_id"], unique = true) // один голос от пользователя на инцидент
+        Index(value = ["incident_id", "user_id"], unique = true), // один голос от пользователя на инцидент
+        Index(value = ["user_id"])
     ],
     foreignKeys = [
         ForeignKey(

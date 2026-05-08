@@ -85,7 +85,9 @@ internal class IncidentRepositoryImpl @Inject constructor(
             )
 
             // Пересчитываем счётчики
-            val (newConfirmCount, newDisputeCount) = verificationDao.getVerificationCounts(incidentId)
+            val counts = verificationDao.getVerificationCounts(incidentId)
+            val newConfirmCount = counts.confirmCount
+            val newDisputeCount = counts.disputeCount
 
             // Определяем новый статус согласно алгоритму
             val newStatus = when {

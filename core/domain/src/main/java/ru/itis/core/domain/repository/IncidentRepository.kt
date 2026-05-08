@@ -10,9 +10,7 @@ import ru.itis.core.utils.properties.OtherProperties
  */
 interface IncidentRepository {
 
-    /** Добавление нового инцидента.
-     * Возвращает сгенерированный ID новой записи.
-     */
+    /** Добавление нового инцидента. */
     suspend fun addIncident(incident: IncidentModel): OperationResult<Unit>
 
     /**

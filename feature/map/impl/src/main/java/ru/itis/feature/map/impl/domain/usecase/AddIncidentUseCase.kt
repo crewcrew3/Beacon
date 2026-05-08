@@ -10,7 +10,6 @@ import ru.itis.core.domain.repository.IncidentRepository
 import ru.itis.core.domain.repository.UserRepository
 import ru.itis.core.utils.BusinessErrorCode
 import ru.itis.core.utils.OperationResult
-import ru.itis.core.utils.properties.ExceptionCode
 import java.lang.IllegalArgumentException
 import java.time.LocalDateTime
 import javax.inject.Inject

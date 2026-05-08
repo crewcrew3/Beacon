@@ -6,12 +6,9 @@ import ru.itis.data.impl.local.entity.IncidentEntity
 @Dao
 internal interface IncidentDao {
 
-    /**
-     * Вставка инцидента в БД.
-     * onConflict = REPLACE гарантирует, что при повторной вставке с тем же ID данные обновятся.
-     */
+    /** Вставка инцидента в БД. */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertIncident(incident: IncidentEntity): Long
+    suspend fun insertIncident(incident: IncidentEntity)
 
     /**
      * Обновление существующего инцидента по объекту.
