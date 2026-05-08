@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import ru.itis.core.ui.R
 import ru.itis.core.utils.ExceptionHandler
+import ru.itis.core.utils.OperationResult
 import ru.itis.feature.profile.impl.domain.usecase.CheckIsUserAuthUseCase
 import ru.itis.feature.profile.impl.domain.usecase.GetProfileUseCase
 import ru.itis.feature.profile.impl.domain.usecase.LogOutUseCase
@@ -41,7 +42,7 @@ internal class ProfileViewModel @Inject constructor(
     fun processEvent(event: ProfileScreenEvent) {
         when (event) {
             is ProfileScreenEvent.OnInitProfile -> {
-                checkIsUserAuth()
+                getUserProfile()
             }
             is ProfileScreenEvent.OnLogOutTabClick -> logOutUser()
 
@@ -51,62 +52,46 @@ internal class ProfileViewModel @Inject constructor(
         }
     }
 
-    private fun checkIsUserAuth() {
-        viewModelScope.launch {
-            runCatching {
-                checkIsUserAuthUseCase()
-            }.onSuccess { isAuth ->
-                if (isAuth) {
-                    getUserProfile()
-                } else {
-                    _pageState.value = ProfileScreenState.Unauthorized
-                }
-            }.onFailure { exception ->
-                val messageResId = exceptionHandler.handleExceptionMessage(exception.message)
-                _pageEffect.emit(
-                    ProfileScreenEffect.Message(
-                        message = messageResId
-                    )
-                )
-            }
-        }
-    }
-
     private fun getUserProfile() {
         viewModelScope.launch {
-            runCatching {
-                _pageState.value = ProfileScreenState.Loading
-                delay(4000) //ну чтобы шиммеры красиво туда-сюда типа профиль загружается
-                getProfileUseCase()
-            }.onSuccess { result ->
-                _pageState.value = ProfileScreenState.ProfileResult(result = result)
-            }.onFailure { exception ->
-                val messageResId = exceptionHandler.handleExceptionMessage(exception.message)
-                _pageEffect.emit(
-                    ProfileScreenEffect.Message(
-                        message = messageResId
-                    )
-                )
+            _pageState.value = ProfileScreenState.Loading
+            delay(2000) // чтобы шиммеры красиво туда-сюда типа профиль загружается
+            if (checkIsUserAuthUseCase()) {
+                when (val result = getProfileUseCase()) {
+                    is OperationResult.Success -> {
+                        _pageState.value = ProfileScreenState.ProfileResult(result = result.data)
+                    }
+
+                    is OperationResult.Error -> {
+                        val messageResId = exceptionHandler.getErrorMessage(result.errorType)
+                        _pageEffect.emit(
+                            ProfileScreenEffect.Message(message = messageResId)
+                        )
+                        // В случае ошибки показываем неавторизованное состояние
+                        _pageState.value = ProfileScreenState.Unauthorized
+                    }
+                }
+            } else {
+                _pageState.value = ProfileScreenState.Unauthorized
             }
         }
     }
 
     private fun logOutUser() {
         viewModelScope.launch {
-            runCatching {
-                logOutUseCase()
-            }.onSuccess {
-                _pageEffect.emit(
-                    ProfileScreenEffect.Message(R.string.toast_msg_logout_successful)
-                )
-                profileNavigator.back()
-            }.onFailure { exception ->
-                val messageResId = exceptionHandler.handleExceptionMessage(exception.message)
-                _pageEffect.emit(
-                    ProfileScreenEffect.Message(
-                        message = messageResId
+            when (val result = logOutUseCase()) {
+                is OperationResult.Success -> {
+                    _pageEffect.emit(
+                        ProfileScreenEffect.Message(R.string.toast_msg_logout_successful)
                     )
-                )
+                    profileNavigator.back()
+                }
+                is OperationResult.Error -> {
+                    val messageResId = exceptionHandler.getErrorMessage(result.errorType)
+                    _pageEffect.emit(
+                        ProfileScreenEffect.Message(message = messageResId)
+                    )
+                }
             }
         }
     }

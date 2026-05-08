@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import ru.itis.core.domain.qualifiers.IoDispatchers
 import ru.itis.core.domain.repository.AuthRepository
+import ru.itis.core.utils.OperationResult
 import javax.inject.Inject
 
 internal class SignUpUserUseCase @Inject constructor(
@@ -15,14 +16,12 @@ internal class SignUpUserUseCase @Inject constructor(
         phoneNumber: String,
         password: String,
         repeatPassword: String
-    ) {
-        withContext(dispatcher) {
-            authRepository.signUp(
-                nickname = nickname,
-                phoneNumber = phoneNumber,
-                password = password,
-                repeatPassword = repeatPassword
-            )
-        }
+    ): OperationResult<Unit> = withContext(dispatcher) {
+        authRepository.signUp(
+            nickname = nickname,
+            phoneNumber = phoneNumber,
+            password = password,
+            repeatPassword = repeatPassword
+        )
     }
 }
