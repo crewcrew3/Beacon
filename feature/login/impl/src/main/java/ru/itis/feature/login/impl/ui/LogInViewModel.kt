@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import ru.itis.core.ui.R
 import ru.itis.core.ui.model.AuthFormState
 import ru.itis.core.utils.ExceptionHandler
+import ru.itis.core.utils.OperationResult
 import ru.itis.feature.login.impl.domain.usecase.LogInUserUseCase
 import ru.itis.feature.login.impl.ui.mvi.LogInScreenEffect
 import ru.itis.feature.login.impl.ui.mvi.LogInScreenEvent
@@ -50,6 +51,7 @@ internal class LogInViewModel @Inject constructor(
                     )
                 }
             }
+
             is LogInScreenEvent.OnBackBtnClick -> profileNavigator.back()
         }
     }
@@ -59,25 +61,27 @@ internal class LogInViewModel @Inject constructor(
         password: String,
     ) {
         viewModelScope.launch {
-            runCatching {
-                logInUserUseCase(
-                    phoneNumber = phoneNumber,
-                    password = password,
-                )
-            }.onSuccess {
-                _pageEffect.emit(
-                    LogInScreenEffect.Message(
-                        message = R.string.toast_msg_login_successful
+            when (val result = logInUserUseCase(
+                phoneNumber = phoneNumber,
+                password = password,
+            )) {
+                is OperationResult.Success -> {
+                    _pageEffect.emit(
+                        LogInScreenEffect.Message(
+                            message = R.string.toast_msg_login_successful
+                        )
                     )
-                )
-                profileNavigator.back()
-            }.onFailure { exception ->
-                val messageResId = exceptionHandler.handleExceptionMessage(exception.message)
-                _pageEffect.emit(
-                    LogInScreenEffect.Message(
-                        message = messageResId
+                    profileNavigator.back()
+                }
+
+                is OperationResult.Error -> {
+                    val messageResId = exceptionHandler.getErrorMessage(result.errorType)
+                    _pageEffect.emit(
+                        LogInScreenEffect.Message(
+                            message = messageResId
+                        )
                     )
-                )
+                }
             }
         }
     }

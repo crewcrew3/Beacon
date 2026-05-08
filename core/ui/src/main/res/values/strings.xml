@@ -3,15 +3,18 @@
     <string name="app_name">Beacon</string>
 
     <string name="exception_msg_common">Неизвестная ошибка</string>
+    <string name="exception_msg_validation">Ошибка валидации. Некорректные данные</string>
+    <string name="exception_msg_network">Ошибка сети</string>
     <string name="exception_msg_bad_request">Неверный ввод данных</string>
     <string name="exception_msg_not_found">Данные не найдены</string>
     <string name="exception_msg_forbidden">Доступ запрещен</string>
     <string name="exception_msg_unauthorized">Требуется авторизация</string>
     <string name="exception_msg_auth_wrong_credentials">Неверный номер телефона или пароль</string>
     <string name="exception_msg_user_already_exists">Пользователь с таким номером телефона уже существует</string>
-    <string name="exception_msg_profile">Ошибка получения данных профиля</string>
-    <string name="exception_msg_art_response">Ошибка получения данных</string>
+    <string name="exception_msg_user_not_found">Такой пользователь не найден</string>
+    <string name="exception_msg_get_data">Ошибка получения данных</string>
     <string name="exception_msg_log_out">Ошибка выхода из системы</string>
+    <string name="exception_msg_incident_not_found">Такого инцидента не существует</string>
 
     <string name="placeholder_text_input">Введите</string>
     <string name="label_nickname">Никнейм</string>

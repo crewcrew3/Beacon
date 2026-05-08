@@ -1,12 +1,14 @@
 package ru.itis.core.domain.repository
 
+import ru.itis.core.utils.OperationResult
+
 /**
  * Репозиторий для работы с авторизацией.
  */
 interface AuthRepository {
 
     /** Вход в систему.*/
-    suspend fun logIn(phoneNumber: String, password: String)
+    suspend fun logIn(phoneNumber: String, password: String): OperationResult<Unit>
 
     /** Регистрация.*/
     suspend fun signUp(
@@ -14,10 +16,10 @@ interface AuthRepository {
         phoneNumber: String,
         password: String,
         repeatPassword: String
-    )
+    ): OperationResult<Unit>
 
     /** Выход из системы.*/
-    suspend fun logOut()
+    suspend fun logOut(): OperationResult<Unit>
 
     /** Проверка авторизован ли пользователь.*/
     suspend fun isUserAuth(): Boolean

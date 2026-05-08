@@ -2,6 +2,7 @@ package ru.itis.core.domain.repository
 
 import ru.itis.core.domain.model.mark.IncidentModel
 import ru.itis.core.domain.model.mark.VerificationActionType
+import ru.itis.core.utils.OperationResult
 import ru.itis.core.utils.properties.OtherProperties
 
 /**
@@ -9,10 +10,8 @@ import ru.itis.core.utils.properties.OtherProperties
  */
 interface IncidentRepository {
 
-    /** Добавление нового инцидента.
-     * Возвращает сгенерированный ID новой записи.
-     */
-    suspend fun addIncident(incident: IncidentModel): Long
+    /** Добавление нового инцидента. */
+    suspend fun addIncident(incident: IncidentModel): OperationResult<Unit>
 
     /**
      * Получение видимых инцидентов в заданной географической области.
@@ -23,12 +22,12 @@ interface IncidentRepository {
         maxLat: Double,
         minLng: Double,
         maxLng: Double
-    ): List<IncidentModel>
+    ): OperationResult<List<IncidentModel>>
 
     /**
      * Получение только верифицированных инцидентов для алгоритма маршрутизации.
      */
-    suspend fun getVerifiedIncidents(): List<IncidentModel>
+    suspend fun getVerifiedIncidents(): OperationResult<List<IncidentModel>>
 
     /**
      * Обработка действия верификации (подтверждение или оспаривание).
@@ -42,5 +41,5 @@ interface IncidentRepository {
         action: VerificationActionType,
         confirmThreshold: Int = OtherProperties.CONFIRM_THRESHOLD,
         disputeThreshold: Int = OtherProperties.DISPUTE_THRESHOLD
-    ): Boolean
+    ): OperationResult<Unit>
 }

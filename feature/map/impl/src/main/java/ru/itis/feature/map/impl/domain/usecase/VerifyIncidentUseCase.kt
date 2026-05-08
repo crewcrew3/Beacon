@@ -6,7 +6,8 @@ import ru.itis.core.domain.model.mark.VerificationActionType
 import ru.itis.core.domain.qualifiers.IoDispatchers
 import ru.itis.core.domain.repository.IncidentRepository
 import ru.itis.core.domain.repository.UserRepository
-import ru.itis.core.utils.properties.ExceptionCode
+import ru.itis.core.utils.BusinessErrorCode
+import ru.itis.core.utils.OperationResult
 import ru.itis.core.utils.properties.OtherProperties
 import javax.inject.Inject
 
@@ -30,16 +31,28 @@ internal class VerifyIncidentUseCase @Inject constructor(
         action: VerificationActionType,
         confirmThreshold: Int = OtherProperties.CONFIRM_THRESHOLD,
         disputeThreshold: Int = OtherProperties.DISPUTE_THRESHOLD
-    ) {
-        withContext(dispatcher) {
-            val currentUser = userRepository.getCurrentUser() ?: throw IllegalArgumentException(ExceptionCode.UNAUTHORIZED)
-            incidentRepository.processVerification(
-                incidentId = incidentId,
-                userId = requireNotNull(currentUser.id) { ExceptionCode.UNKNOWN_ERROR },
-                action = action,
-                confirmThreshold = confirmThreshold,
-                disputeThreshold = disputeThreshold
-            )
+    ): OperationResult<Unit> {
+        return withContext(dispatcher) {
+            when (val currentUserResult = userRepository.getCurrentUser()) {
+                is OperationResult.Success -> {
+                    val currentUser = currentUserResult.data
+                    val userId = currentUser.id ?: return@withContext OperationResult.Error(
+                        OperationResult.ErrorType.Business(BusinessErrorCode.USER_ID_NOT_FOUND)
+                    )
+
+                    incidentRepository.processVerification(
+                        incidentId = incidentId,
+                        userId = userId,
+                        action = action,
+                        confirmThreshold = confirmThreshold,
+                        disputeThreshold = disputeThreshold
+                    )
+                }
+
+                is OperationResult.Error -> {
+                    return@withContext OperationResult.Error(currentUserResult.errorType)
+                }
+            }
         }
     }
 }

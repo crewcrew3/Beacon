@@ -5,7 +5,8 @@ import kotlinx.coroutines.withContext
 import ru.itis.core.domain.model.mark.IncidentModel
 import ru.itis.core.domain.qualifiers.IoDispatchers
 import ru.itis.core.domain.repository.IncidentRepository
-import ru.itis.core.utils.properties.ExceptionCode
+import ru.itis.core.utils.BusinessErrorCode
+import ru.itis.core.utils.OperationResult
 import javax.inject.Inject
 
 /**
@@ -19,11 +20,15 @@ internal class GetVisibleIncidentsUseCase @Inject constructor(
 
     /**
      * @param bounds массив из 4 Double: [minLat, maxLat, minLng, maxLng]
-     * @return список инцидентов, которые нужно отобразить на карте
+     * @return результат с списком инцидентов или ошибкой
      */
-    suspend operator fun invoke(bounds: DoubleArray): List<IncidentModel> {
+    suspend operator fun invoke(bounds: DoubleArray): OperationResult<List<IncidentModel>> {
         return withContext(dispatcher) {
-            require(bounds.size == 4) { ExceptionCode.BOUNDS_ERROR }
+            if (bounds.size != 4) {
+                return@withContext OperationResult.Error(
+                    OperationResult.ErrorType.Business(BusinessErrorCode.INVALID_BOUNDS)
+                )
+            }
             incidentRepository.getVisibleIncidents(
                 minLat = bounds[0],
                 maxLat = bounds[1],

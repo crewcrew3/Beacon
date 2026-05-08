@@ -8,7 +8,8 @@ import ru.itis.core.domain.model.mark.IncidentType
 import ru.itis.core.domain.qualifiers.IoDispatchers
 import ru.itis.core.domain.repository.IncidentRepository
 import ru.itis.core.domain.repository.UserRepository
-import ru.itis.core.utils.properties.ExceptionCode
+import ru.itis.core.utils.BusinessErrorCode
+import ru.itis.core.utils.OperationResult
 import java.lang.IllegalArgumentException
 import java.time.LocalDateTime
 import javax.inject.Inject
@@ -34,21 +35,33 @@ internal class AddIncidentUseCase @Inject constructor(
         longitude: Double,
         type: IncidentType,
         description: String? = null
-    ): Long {
+    ): OperationResult<Unit> {
         return withContext(dispatcher) {
-            // Получаем ID текущего пользователя из хранилища
-            val currentUser = userRepository.getCurrentUser() ?: throw IllegalArgumentException(ExceptionCode.UNAUTHORIZED)
+            // Получаем текущего пользователя
+            when (val currentUserResult = userRepository.getCurrentUser()) {
+                is OperationResult.Success -> {
+                    val currentUser = currentUserResult.data
+                    val userId = currentUser.id ?: return@withContext OperationResult.Error(
+                        OperationResult.ErrorType.Business(BusinessErrorCode.USER_ID_NOT_FOUND)
+                    )
 
-            val newIncident = IncidentModel(
-                creatorId = requireNotNull(currentUser.id) { ExceptionCode.UNKNOWN_ERROR },
-                latitude = latitude,
-                longitude = longitude,
-                type = type,
-                description = description,
-                createdAt = LocalDateTime.now(),
-                status = IncidentStatus.PENDING_VERIFICATION
-            )
-            incidentRepository.addIncident(newIncident)
+                    val newIncident = IncidentModel(
+                        creatorId = userId,
+                        latitude = latitude,
+                        longitude = longitude,
+                        type = type,
+                        description = description,
+                        createdAt = LocalDateTime.now(),
+                        status = IncidentStatus.PENDING_VERIFICATION
+                    )
+
+                    incidentRepository.addIncident(newIncident)
+                }
+
+                is OperationResult.Error -> {
+                    return@withContext OperationResult.Error(currentUserResult.errorType)
+                }
+            }
         }
     }
 }

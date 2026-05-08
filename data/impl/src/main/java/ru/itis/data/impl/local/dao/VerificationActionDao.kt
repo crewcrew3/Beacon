@@ -2,6 +2,7 @@ package ru.itis.data.impl.local.dao
 
 import androidx.room.*
 import ru.itis.data.impl.local.entity.VerificationActionEntity
+import ru.itis.data.impl.local.entity.VerificationCounts
 
 @Dao
 internal interface VerificationActionDao {
@@ -15,7 +16,7 @@ internal interface VerificationActionDao {
 
     /**
      * Подсчёт количества подтверждений и оспариваний для инцидента.
-     * Возвращает пару (confirmCount, disputeCount).
+     * Возвращает объект VerificationCounts с confirmCount и disputeCount.
      */
     @Query("""
         SELECT 
@@ -24,5 +25,5 @@ internal interface VerificationActionDao {
         FROM verification_actions 
         WHERE incident_id = :incidentId
     """)
-    suspend fun getVerificationCounts(incidentId: Long): Pair<Long, Long>
+    suspend fun getVerificationCounts(incidentId: Long): VerificationCounts
 }

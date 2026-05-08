@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import ru.itis.core.ui.R
 import ru.itis.core.ui.model.AuthFormState
 import ru.itis.core.utils.ExceptionHandler
+import ru.itis.core.utils.OperationResult
 import ru.itis.core.utils.ValidatorHelper
 import ru.itis.feature.signup.impl.domain.usecase.SignUpUserUseCase
 import ru.itis.feature.signup.impl.ui.mvi.SignUpScreenEffect
@@ -55,6 +56,7 @@ internal class SignUpViewModel @Inject constructor(
                     )
                 }
             }
+
             is SignUpScreenEvent.OnBackBtnClick -> profileNavigator.back()
         }
     }
@@ -66,33 +68,35 @@ internal class SignUpViewModel @Inject constructor(
         repeatPassword: String
     ) {
         viewModelScope.launch {
-            if (validateRegisterForm(
+            if (!validateRegisterForm(
                     nickname = nickname,
                     phoneNumber = phoneNumber,
                     password = password,
                     repeatPassword = repeatPassword,
                 )
             ) {
-                runCatching {
-                    signUpUserUseCase(
-                        nickname = nickname,
-                        phoneNumber = phoneNumber,
-                        password = password,
-                        repeatPassword = repeatPassword
-                    )
-                }.onSuccess {
+                return@launch
+            }
+
+            when (val result = signUpUserUseCase(
+                nickname = nickname,
+                phoneNumber = phoneNumber,
+                password = password,
+                repeatPassword = repeatPassword
+            )) {
+                is OperationResult.Success -> {
                     _pageEffect.emit(
                         SignUpScreenEffect.Message(
                             message = R.string.toast_msg_signup_successful
                         )
                     )
                     profileNavigator.back()
-                }.onFailure { exception ->
-                    val messageResId = exceptionHandler.handleExceptionMessage(exception.message)
+                }
+
+                is OperationResult.Error -> {
+                    val messageResId = exceptionHandler.getErrorMessage(result.errorType)
                     _pageEffect.emit(
-                        SignUpScreenEffect.Message(
-                            message = messageResId
-                        )
+                        SignUpScreenEffect.Message(message = messageResId)
                     )
                 }
             }
@@ -110,14 +114,23 @@ internal class SignUpViewModel @Inject constructor(
         val isPasswordValid = ValidatorHelper.validatePassword(password)
         val isRepeatPasswordValid = (password == repeatPassword)
 
-        _pageEffect.emit(
-            SignUpScreenEffect.FormErrors(
-                isNicknameError = !isNicknameValid,
-                isPhoneNumberError = !isPhoneNumberValid,
-                isPasswordError = !isPasswordValid,
-                isRepeatPasswordError = !isRepeatPasswordValid,
+        val hasErrors = listOf(
+            !isNicknameValid,
+            !isPhoneNumberValid,
+            !isPasswordValid,
+            !isRepeatPasswordValid
+        ).any { it }
+
+        if (hasErrors) {
+            _pageEffect.emit(
+                SignUpScreenEffect.FormErrors(
+                    isNicknameError = !isNicknameValid,
+                    isPhoneNumberError = !isPhoneNumberValid,
+                    isPasswordError = !isPasswordValid,
+                    isRepeatPasswordError = !isRepeatPasswordValid,
+                )
             )
-        )
-        return isNicknameValid && isPasswordValid && isPhoneNumberValid && isRepeatPasswordValid
+        }
+        return !hasErrors
     }
 }

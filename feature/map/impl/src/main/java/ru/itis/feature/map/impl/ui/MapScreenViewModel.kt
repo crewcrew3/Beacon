@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import ru.itis.core.domain.model.mark.IncidentType
 import ru.itis.core.ui.R
 import ru.itis.core.utils.ExceptionHandler
+import ru.itis.core.utils.OperationResult
 import ru.itis.feature.map.impl.domain.usecase.AddIncidentUseCase
 import ru.itis.feature.map.impl.domain.usecase.GetVisibleIncidentsUseCase
 import ru.itis.feature.map.impl.domain.usecase.VerifyIncidentUseCase
@@ -64,14 +65,16 @@ internal class MapScreenViewModel @Inject constructor(
      */
     private fun loadIncidentsInBounds(bounds: DoubleArray) {
         viewModelScope.launch {
-            runCatching {
-                _pageState.value = MapScreenState.Loading
-                getVisibleIncidentsUseCase(bounds)
-            }.onSuccess { incidents ->
-                _pageState.value = MapScreenState.IncidentsLoaded(incidents)
-            }.onFailure { exception ->
-                val messageResId = exceptionHandler.handleExceptionMessage(exception.message)
-                _pageEffect.emit(MapScreenEffect.Message(messageResId))
+            _pageState.value = MapScreenState.Loading
+
+            when (val result = getVisibleIncidentsUseCase(bounds)) {
+                is OperationResult.Success -> {
+                    _pageState.value = MapScreenState.IncidentsLoaded(result.data)
+                }
+                is OperationResult.Error -> {
+                    val messageResId = exceptionHandler.getErrorMessage(result.errorType)
+                    _pageEffect.emit(MapScreenEffect.Message(messageResId))
+                }
             }
         }
     }
@@ -84,18 +87,20 @@ internal class MapScreenViewModel @Inject constructor(
         description: String?
     ) {
         viewModelScope.launch {
-            runCatching {
-                addIncidentUseCase(latitude, longitude, type, description)
-            }.onSuccess {
-                _pageEffect.emit(MapScreenEffect.Message(R.string.toast_msg_incident_added))
-                // Перезагружаем инциденты в текущей области, чтобы отобразить новую метку
-                val currentState = _pageState.value
-                if (currentState is MapScreenState.IncidentsLoaded) {
-                    // TODO("Обновить юай с инцидентами после добавления нового")
+            when (val result = addIncidentUseCase(latitude, longitude, type, description)) {
+                is OperationResult.Success -> {
+                    _pageEffect.emit(MapScreenEffect.Message(R.string.toast_msg_incident_added))
+                    // Перезагружаем инциденты в текущей области, чтобы отобразить новую метку
+                    val currentState = _pageState.value
+                    if (currentState is MapScreenState.IncidentsLoaded) {
+                        //TODO()
+                        // Можно либо перезагрузить все инциденты, либо добавить новый в существующий список
+                    }
                 }
-            }.onFailure { exception ->
-                val messageResId = exceptionHandler.handleExceptionMessage(exception.message)
-                _pageEffect.emit(MapScreenEffect.Message(messageResId))
+                is OperationResult.Error -> {
+                    val messageResId = exceptionHandler.getErrorMessage(result.errorType)
+                    _pageEffect.emit(MapScreenEffect.Message(messageResId))
+                }
             }
         }
     }
@@ -106,13 +111,19 @@ internal class MapScreenViewModel @Inject constructor(
         action: ru.itis.core.domain.model.mark.VerificationActionType
     ) {
         viewModelScope.launch {
-            runCatching {
-                verifyIncidentUseCase(incidentId, action)
-            }.onSuccess {
-                _pageEffect.emit(MapScreenEffect.Message(R.string.toast_msg_incident_voited))
-            }.onFailure { exception ->
-                val messageResId = exceptionHandler.handleExceptionMessage(exception.message)
-                _pageEffect.emit(MapScreenEffect.Message(messageResId))
+            when (val result = verifyIncidentUseCase(incidentId, action)) {
+                is OperationResult.Success -> {
+                    _pageEffect.emit(MapScreenEffect.Message(R.string.toast_msg_incident_voited))
+
+                    val currentState = _pageState.value
+                    if (currentState is MapScreenState.IncidentsLoaded) {
+                        //TODO("Возможно понадобиться перезагрузить состояние метки")
+                    }
+                }
+                is OperationResult.Error -> {
+                    val messageResId = exceptionHandler.getErrorMessage(result.errorType)
+                    _pageEffect.emit(MapScreenEffect.Message(messageResId))
+                }
             }
         }
     }

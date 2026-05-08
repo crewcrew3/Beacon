@@ -150,7 +150,7 @@ internal fun ProfileScreen(
                             Box(
                                 contentAlignment = Alignment.Center
                             ) {
-                                if (profile.imageUrl.isNotBlank()) {
+                                if (profile.imageUrl != null) {
                                     ImageCustom(
                                         imageSettings = ImageSettings(
                                             url = profile.imageUrl,

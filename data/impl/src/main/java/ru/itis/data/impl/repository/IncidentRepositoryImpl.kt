@@ -2,6 +2,8 @@ package ru.itis.data.impl.repository
 
 import ru.itis.core.domain.model.mark.*
 import ru.itis.core.domain.repository.IncidentRepository
+import ru.itis.core.utils.BusinessErrorCode
+import ru.itis.core.utils.OperationResult
 import ru.itis.data.impl.local.dao.IncidentDao
 import ru.itis.data.impl.local.dao.VerificationActionDao
 import ru.itis.data.impl.local.entity.VerificationActionEntity
@@ -16,9 +18,14 @@ internal class IncidentRepositoryImpl @Inject constructor(
     private val modelToEntity: IncidentModelToEntityMapper,
 ) : IncidentRepository {
 
-    override suspend fun addIncident(incident: IncidentModel): Long {
-        val entity = modelToEntity.map(incident)
-        return incidentDao.insertIncident(entity)
+    override suspend fun addIncident(incident: IncidentModel): OperationResult<Unit> {
+        return try {
+            val entity = modelToEntity.map(incident)
+            incidentDao.insertIncident(entity)
+            OperationResult.Success(Unit)
+        } catch (e: Exception) {
+            OperationResult.Error(OperationResult.ErrorType.Unknown(e))
+        }
     }
 
     override suspend fun getVisibleIncidents(
@@ -26,25 +33,33 @@ internal class IncidentRepositoryImpl @Inject constructor(
         maxLat: Double,
         minLng: Double,
         maxLng: Double
-    ): List<IncidentModel> {
-        val entities = incidentDao.getVisibleIncidentsInBounds(
-            minLat = minLat,
-            maxLat = maxLat,
-            minLng = minLng,
-            maxLng = maxLng,
-            visibleStatuses = listOf(
-                IncidentStatus.VERIFIED.name,
-                IncidentStatus.PENDING_VERIFICATION.name
+    ): OperationResult<List<IncidentModel>> {
+        return try {
+            val entities = incidentDao.getVisibleIncidentsInBounds(
+                minLat = minLat,
+                maxLat = maxLat,
+                minLng = minLng,
+                maxLng = maxLng,
+                visibleStatuses = listOf(
+                    IncidentStatus.VERIFIED.name,
+                    IncidentStatus.PENDING_VERIFICATION.name
+                )
             )
-        )
-        return entityToModel.mapList(entities)
+            OperationResult.Success(entityToModel.mapList(entities))
+        } catch (e: Exception) {
+            OperationResult.Error(OperationResult.ErrorType.Unknown(e))
+        }
     }
 
-    override suspend fun getVerifiedIncidents(): List<IncidentModel> {
-        val entities = incidentDao.getVerifiedIncidentsForRouting(
-            verifiedStatus = IncidentStatus.VERIFIED.name
-        )
-        return entityToModel.mapList(entities)
+    override suspend fun getVerifiedIncidents(): OperationResult<List<IncidentModel>> {
+        return try {
+            val entities = incidentDao.getVerifiedIncidentsForRouting(
+                verifiedStatus = IncidentStatus.VERIFIED.name
+            )
+            OperationResult.Success(entityToModel.mapList(entities))
+        } catch (e: Exception) {
+            OperationResult.Error(OperationResult.ErrorType.Unknown(e))
+        }
     }
 
     override suspend fun processVerification(
@@ -53,38 +68,45 @@ internal class IncidentRepositoryImpl @Inject constructor(
         action: VerificationActionType,
         confirmThreshold: Int,
         disputeThreshold: Int
-    ): Boolean {
-        // Проверяем, существует ли инцидент
-        val incident = incidentDao.getIncidentById(incidentId) ?: return false
-
-        // Сохраняем действие верификации (не проверяем, голосовал ли пользователь, тк можно изменить голос)
-        verificationDao.insertVerificationAction(
-            VerificationActionEntity(
-                incidentId = incidentId,
-                userId = userId,
-                actionType = action.name
+    ): OperationResult<Unit> {
+        try {
+            // Проверяем, существует ли инцидент
+            val incident = incidentDao.getIncidentById(incidentId) ?: return OperationResult.Error(
+                OperationResult.ErrorType.Business(BusinessErrorCode.INCIDENT_NOT_FOUND)
             )
-        )
 
-        // Пересчитываем счётчики
-        val (newConfirmCount, newDisputeCount) = verificationDao.getVerificationCounts(incidentId)
+            // Сохраняем действие верификации (не проверяем, голосовал ли пользователь, тк можно изменить голос)
+            verificationDao.insertVerificationAction(
+                VerificationActionEntity(
+                    incidentId = incidentId,
+                    userId = userId,
+                    actionType = action.name
+                )
+            )
 
-        // Определяем новый статус согласно алгоритму
-        val newStatus = when {
-            newDisputeCount >= disputeThreshold -> IncidentStatus.ARCHIVED.name
-            newConfirmCount >= confirmThreshold && newDisputeCount < disputeThreshold ->
-                IncidentStatus.VERIFIED.name
-            else -> incident.status // оставляем текущий
+            // Пересчитываем счётчики
+            val counts = verificationDao.getVerificationCounts(incidentId)
+            val newConfirmCount = counts.confirmCount
+            val newDisputeCount = counts.disputeCount
+
+            // Определяем новый статус согласно алгоритму
+            val newStatus = when {
+                newDisputeCount >= disputeThreshold -> IncidentStatus.ARCHIVED.name
+                newConfirmCount >= confirmThreshold && newDisputeCount < disputeThreshold ->
+                    IncidentStatus.VERIFIED.name
+                else -> incident.status // оставляем текущий
+            }
+
+            // Обновляем инцидент в БД
+            val updatedIncident = incident.copy(
+                confirmCount = newConfirmCount,
+                disputeCount = newDisputeCount,
+                status = newStatus
+            )
+            incidentDao.updateIncident(updatedIncident)
+            return OperationResult.Success(Unit)
+        } catch (e: Exception) {
+            return OperationResult.Error(OperationResult.ErrorType.Unknown(e))
         }
-
-        // Обновляем инцидент в БД
-        val updatedIncident = incident.copy(
-            confirmCount = newConfirmCount,
-            disputeCount = newDisputeCount,
-            status = newStatus
-        )
-        incidentDao.updateIncident(updatedIncident)
-
-        return true
     }
 }
