@@ -1,13 +1,14 @@
-package ru.itis.feature.map.impl.ui
+package ru.itis.feature.map.impl.ui.utils
 
 import android.content.Context
+import android.graphics.PointF
 import com.yandex.mapkit.geometry.Point
-import com.yandex.mapkit.map.MapObjectCollection
-import com.yandex.mapkit.map.PlacemarkMapObject
 import com.yandex.mapkit.map.CircleMapObject
 import com.yandex.mapkit.map.ClusterizedPlacemarkCollection
 import com.yandex.mapkit.map.IconStyle
+import com.yandex.mapkit.map.MapObjectCollection
 import com.yandex.mapkit.map.MapObjectVisitor
+import com.yandex.mapkit.map.PlacemarkMapObject
 import com.yandex.mapkit.map.PolygonMapObject
 import com.yandex.mapkit.map.PolylineMapObject
 import com.yandex.runtime.image.ImageProvider
@@ -51,7 +52,7 @@ internal class MapIncidentRenderer(
                 // Настраиваем стиль: привязка к низу иконки, масштаб
                 setIconStyle(
                     IconStyle().apply {
-                        anchor = android.graphics.PointF(0.5f, 1.0f)
+                        anchor = PointF(0.5f, 1.0f)
                         scale = 0.8f
                     }
                 )
@@ -177,7 +178,7 @@ internal class MapIncidentRenderer(
             setIcon(getIconForIncident(incident.type, incident.status))
             setIconStyle(
                 IconStyle().apply {
-                    anchor = android.graphics.PointF(0.5f, 1.0f)
+                    anchor = PointF(0.5f, 1.0f)
                     scale = 0.8f
                 }
             )

@@ -1,4 +1,4 @@
-package ru.itis.feature.map.impl.ui
+package ru.itis.feature.map.impl.ui.old
 
 import android.util.Log
 import android.view.View
@@ -21,22 +21,24 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import ru.itis.core.domain.model.mark.IncidentModel
 import ru.itis.core.ui.BaseScreen
 import ru.itis.core.ui.R
 import ru.itis.core.ui.component.settings.BottomBarSettings
 import ru.itis.core.ui.theme.IconsCustom
 import ru.itis.core.ui.theme.StylesCustom
+import ru.itis.feature.map.impl.ui.MapScreenFragment
+import ru.itis.feature.map.impl.ui.MapScreenViewModel
 import ru.itis.feature.map.impl.ui.components.AddIncidentDialog
 import ru.itis.feature.map.impl.ui.components.IncidentDetailDialog
 import ru.itis.feature.map.impl.ui.mvi.MapScreenEffect
 import ru.itis.feature.map.impl.ui.mvi.MapScreenEvent
 import ru.itis.feature.map.impl.ui.mvi.MapScreenState
-import ru.itis.feature.map.impl.ui.utils.MapScreenDelegate
 
 @Composable
 internal fun MapScreenHost() {
@@ -45,33 +47,19 @@ internal fun MapScreenHost() {
     val containerId = remember { View.generateViewId() }
 
     val viewModel: MapScreenViewModel = hiltViewModel()
-
+    Log.i("VM_DEBUG", "ViewModel hashCode: ${viewModel.hashCode()}")
     val pageState by viewModel.pageState.collectAsState(initial = MapScreenState.Initial)
     val selectedIncident by viewModel.selectedIncident.collectAsState()
     val isEditMode by viewModel.isEditMode.collectAsState()
 
+    // Состояния для диалогов
     var showAddDialog by remember { mutableStateOf(false) }
     var addDialogCoords by remember { mutableStateOf(Pair(0.0, 0.0)) }
 
-    // Создаём делегат, который фрагмент будет использовать для отправки событий
-    val fragmentDelegate = remember(viewModel) {
-        object : MapScreenDelegate {
-            override fun onMapTapped(latitude: Double, longitude: Double) {
-                viewModel.processEvent(MapScreenEvent.OnMapTapped(latitude, longitude))
-            }
-            override fun onIncidentClicked(incident: IncidentModel) {
-                viewModel.processEvent(MapScreenEvent.OnIncidentClicked(incident))
-            }
-        }
-    }
-
     LaunchedEffect(Unit) {
         if (fragmentManager.findFragmentById(containerId) == null) {
-            val fragment = MapScreenFragment().apply {
-                delegate = fragmentDelegate
-            }
             fragmentManager.beginTransaction()
-                .replace(containerId, fragment)
+                .replace(containerId, MapScreenFragment::class.java, null)
                 .commit()
         }
 
@@ -88,32 +76,8 @@ internal fun MapScreenHost() {
                     addDialogCoords = Pair(effect.latitude, effect.longitude)
                     showAddDialog = true
                 }
-                is MapScreenEffect.IncidentAdded -> {
-                    // Находим фрагмент и обновляем карту
-                    fragmentManager.findFragmentById(containerId)?.let { frag ->
-                        if (frag is MapScreenFragment) {
-                            frag.addIncident(effect.incident)
-                        }
-                    }
-                }
-                is MapScreenEffect.IncidentStatusUpdated -> {
-                    fragmentManager.findFragmentById(containerId)?.let { frag ->
-                        if (frag is MapScreenFragment) {
-                            frag.updateIncidentStatus(effect.incidentId, effect.incidentType, effect.newStatus)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // Подписка на состояние для первоначальной отрисовки
-    LaunchedEffect(pageState) {
-        if (pageState is MapScreenState.IncidentsLoaded) {
-            fragmentManager.findFragmentById(containerId)?.let { frag ->
-                if (frag is MapScreenFragment) {
-                    frag.renderIncidents((pageState as MapScreenState.IncidentsLoaded).incidents)
-                }
+                // IncidentAdded и IncidentStatusUpdated обрабатываются в Fragment
+                else -> {}
             }
         }
     }
@@ -129,9 +93,23 @@ internal fun MapScreenHost() {
         )
     ) { innerPadding ->
 
+        val density = LocalDensity.current
+        val layoutDir = LocalLayoutDirection.current
+
         AndroidView(
             factory = { ctx ->
-                FrameLayout(ctx).apply { id = containerId }
+                FrameLayout(ctx).apply {
+                    id = containerId
+
+//                    with(density) {
+//                        val leftPx = innerPadding.calculateLeftPadding(layoutDir).roundToPx()
+//                        val topPx = innerPadding.calculateTopPadding().roundToPx()
+//                        val rightPx = innerPadding.calculateRightPadding(layoutDir).roundToPx()
+//                        val bottomPx = innerPadding.calculateBottomPadding().roundToPx()
+//
+//                        setPadding(leftPx, topPx, rightPx, bottomPx)
+//                    }
+                }
             },
         )
 
