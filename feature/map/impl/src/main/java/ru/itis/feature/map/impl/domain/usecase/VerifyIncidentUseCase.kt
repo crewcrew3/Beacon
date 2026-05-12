@@ -2,6 +2,7 @@ package ru.itis.feature.map.impl.domain.usecase
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
+import ru.itis.core.domain.model.mark.IncidentStatus
 import ru.itis.core.domain.model.mark.VerificationActionType
 import ru.itis.core.domain.qualifiers.IoDispatchers
 import ru.itis.core.domain.repository.IncidentRepository
@@ -25,13 +26,14 @@ internal class VerifyIncidentUseCase @Inject constructor(
      * @param action тип действия: CONFIRM или DISPUTE
      * @param confirmThreshold порог подтверждений для перехода в VERIFIED
      * @param disputeThreshold порог оспариваний для перехода в ARCHIVED
+     * Возвращает актуальный статус инцидента после обработки голоса.
      */
     suspend operator fun invoke(
         incidentId: Long,
         action: VerificationActionType,
         confirmThreshold: Int = OtherProperties.CONFIRM_THRESHOLD,
         disputeThreshold: Int = OtherProperties.DISPUTE_THRESHOLD
-    ): OperationResult<Unit> {
+    ): OperationResult<IncidentStatus> {
         return withContext(dispatcher) {
             when (val currentUserResult = userRepository.getCurrentUser()) {
                 is OperationResult.Success -> {
@@ -47,6 +49,18 @@ internal class VerifyIncidentUseCase @Inject constructor(
                         confirmThreshold = confirmThreshold,
                         disputeThreshold = disputeThreshold
                     )
+
+                    // Получаем актуальный статус из БД
+                    when(val updatedIncidentResult = incidentRepository.getIncidentById(incidentId)) {
+                        is OperationResult.Success -> {
+                            val updatedIncident = updatedIncidentResult.data
+                            OperationResult.Success(updatedIncident.status)
+                        }
+
+                        is OperationResult.Error -> {
+                            return@withContext OperationResult.Error(updatedIncidentResult.errorType)
+                        }
+                    }
                 }
 
                 is OperationResult.Error -> {

@@ -6,9 +6,9 @@ import ru.itis.data.impl.local.entity.IncidentEntity
 @Dao
 internal interface IncidentDao {
 
-    /** Вставка инцидента в БД. */
+    /** Вставка инцидента в БД. Возвращает сгенерированный ID новой записи*/
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertIncident(incident: IncidentEntity)
+    suspend fun insertIncident(incident: IncidentEntity): Long
 
     /**
      * Обновление существующего инцидента по объекту.

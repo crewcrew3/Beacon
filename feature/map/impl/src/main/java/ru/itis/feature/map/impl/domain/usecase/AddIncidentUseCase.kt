@@ -35,7 +35,7 @@ internal class AddIncidentUseCase @Inject constructor(
         longitude: Double,
         type: IncidentType,
         description: String? = null
-    ): OperationResult<Unit> {
+    ): OperationResult<IncidentModel> {
         return withContext(dispatcher) {
             // Получаем текущего пользователя
             when (val currentUserResult = userRepository.getCurrentUser()) {
@@ -47,6 +47,7 @@ internal class AddIncidentUseCase @Inject constructor(
 
                     val newIncident = IncidentModel(
                         creatorId = userId,
+                        creatorNickname = currentUser.nickname,
                         latitude = latitude,
                         longitude = longitude,
                         type = type,
@@ -55,7 +56,13 @@ internal class AddIncidentUseCase @Inject constructor(
                         status = IncidentStatus.PENDING_VERIFICATION
                     )
 
-                    incidentRepository.addIncident(newIncident)
+                    // Repository должен вернуть модель с присвоенным ID
+                    when (val saveResult = incidentRepository.addIncident(newIncident)) {
+                        is OperationResult.Success -> {
+                            OperationResult.Success(saveResult.data)
+                        }
+                        is OperationResult.Error -> OperationResult.Error(saveResult.errorType)
+                    }
                 }
 
                 is OperationResult.Error -> {

@@ -1,5 +1,6 @@
 package ru.itis.feature.map.impl.ui
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -8,7 +9,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import ru.itis.core.domain.model.mark.IncidentModel
+import ru.itis.core.domain.model.mark.IncidentStatus
 import ru.itis.core.domain.model.mark.IncidentType
+import ru.itis.core.domain.model.mark.VerificationActionType
 import ru.itis.core.ui.R
 import ru.itis.core.utils.ExceptionHandler
 import ru.itis.core.utils.OperationResult
@@ -36,6 +40,21 @@ internal class MapScreenViewModel @Inject constructor(
     private val _pageEffect = MutableSharedFlow<MapScreenEffect>()
     val pageEffect = _pageEffect.asSharedFlow()
 
+    /**
+     * Флаг режима редактирования.
+     * true — пользователь может добавлять метки тапом по карте.
+     * false — карта в режиме просмотра, тапы игнорируются.
+     */
+    private val _isEditMode = MutableStateFlow(false)
+    val isEditMode = _isEditMode.asStateFlow()
+
+    /**
+     * Текущий выбранный инцидент для отображения в диалоге деталей.
+     * null — диалог закрыт.
+     */
+    private val _selectedIncident = MutableStateFlow<IncidentModel?>(null)
+    val selectedIncident = _selectedIncident.asStateFlow()
+
     fun processEvent(event: MapScreenEvent) {
         when (event) {
             is MapScreenEvent.OnProfileBottomBarClick -> bottomBarNavigator.toProfileScreen()
@@ -55,6 +74,31 @@ internal class MapScreenViewModel @Inject constructor(
                     incidentId = event.incidentId,
                     action = event.action
                 )
+            }
+            is MapScreenEvent.OnToggleEditMode -> {
+                _isEditMode.value = !_isEditMode.value
+                Log.i("ADD_INCIDENT_DEBUG", "Edit Mode: ${_isEditMode.value}")
+            }
+            is MapScreenEvent.OnMapTapped -> {
+                Log.i("ADD_INCIDENT_DEBUG", "ViewModel event worked. Edit Mode: ${_isEditMode.value}")
+                // Реагируем на тап по карте только в режиме редактирования
+                if (_isEditMode.value) {
+                    Log.i("ADD_INCIDENT_DEBUG", "Edit mode is ON")
+                    viewModelScope.launch {
+                        _pageEffect.emit(
+                            MapScreenEffect.ShowAddIncidentDialog(
+                                event.latitude,
+                                event.longitude
+                            )
+                        )
+                    }
+                }
+            }
+            is MapScreenEvent.OnIncidentClicked -> {
+                _selectedIncident.value = event.incident
+            }
+            is MapScreenEvent.OnCloseIncidentDialog -> {
+                _selectedIncident.value = null
             }
         }
     }
@@ -90,11 +134,17 @@ internal class MapScreenViewModel @Inject constructor(
             when (val result = addIncidentUseCase(latitude, longitude, type, description)) {
                 is OperationResult.Success -> {
                     _pageEffect.emit(MapScreenEffect.Message(R.string.toast_msg_incident_added))
-                    // Перезагружаем инциденты в текущей области, чтобы отобразить новую метку
+
+                    val newIncident = result.data
+
+                    // Добавляем новый инцидент в текущий список
                     val currentState = _pageState.value
                     if (currentState is MapScreenState.IncidentsLoaded) {
-                        //TODO()
-                        // Можно либо перезагрузить все инциденты, либо добавить новый в существующий список
+                        _pageState.value = MapScreenState.IncidentsLoaded(
+                            incidents = currentState.incidents + newIncident
+                        )
+                        // Уведомляем рендерер о добавлении одной метки
+                        _pageEffect.emit(MapScreenEffect.IncidentAdded(newIncident))
                     }
                 }
                 is OperationResult.Error -> {
@@ -108,16 +158,43 @@ internal class MapScreenViewModel @Inject constructor(
     /** Обрабатывает голос пользователя за инцидент. */
     private fun processVerification(
         incidentId: Long,
-        action: ru.itis.core.domain.model.mark.VerificationActionType
+        action: VerificationActionType
     ) {
         viewModelScope.launch {
             when (val result = verifyIncidentUseCase(incidentId, action)) {
                 is OperationResult.Success -> {
                     _pageEffect.emit(MapScreenEffect.Message(R.string.toast_msg_incident_voited))
 
+                    val actualStatus = result.data // достоверный статус из БД
+                    var incidentType = IncidentType.OTHER
+
+                    // Находим инцидент в текущем списке и обновляем
                     val currentState = _pageState.value
                     if (currentState is MapScreenState.IncidentsLoaded) {
-                        //TODO("Возможно понадобиться перезагрузить состояние метки")
+                        val updatedIncidents = currentState.incidents.map { incident ->
+                            if (incident.id == incidentId) {
+                                incidentType = incident.type
+                                incident.copy(
+                                    status = actualStatus,
+                                    confirmCount = if (action == VerificationActionType.CONFIRM)
+                                        incident.confirmCount + 1 else incident.confirmCount,
+                                    disputeCount = if (action == VerificationActionType.DISPUTE)
+                                        incident.disputeCount + 1 else incident.disputeCount
+                                )
+                            } else {
+                                incident
+                            }
+                        }
+                        _pageState.value = MapScreenState.IncidentsLoaded(updatedIncidents)
+
+                        // Уведомляем рендерер об обновлении статуса
+                        _pageEffect.emit(
+                            MapScreenEffect.IncidentStatusUpdated(
+                                incidentId = incidentId,
+                                incidentType = incidentType,
+                                newStatus = actualStatus
+                            )
+                        )
                     }
                 }
                 is OperationResult.Error -> {

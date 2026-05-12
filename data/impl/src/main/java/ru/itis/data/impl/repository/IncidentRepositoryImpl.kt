@@ -18,11 +18,12 @@ internal class IncidentRepositoryImpl @Inject constructor(
     private val modelToEntity: IncidentModelToEntityMapper,
 ) : IncidentRepository {
 
-    override suspend fun addIncident(incident: IncidentModel): OperationResult<Unit> {
+    override suspend fun addIncident(incident: IncidentModel): OperationResult<IncidentModel> {
         return try {
             val entity = modelToEntity.map(incident)
-            incidentDao.insertIncident(entity)
-            OperationResult.Success(Unit)
+            val generatedId = incidentDao.insertIncident(entity)
+            val savedIncident = incident.copy(id = generatedId)
+            OperationResult.Success(savedIncident)
         } catch (e: Exception) {
             OperationResult.Error(OperationResult.ErrorType.Unknown(e))
         }
@@ -107,6 +108,17 @@ internal class IncidentRepositoryImpl @Inject constructor(
             return OperationResult.Success(Unit)
         } catch (e: Exception) {
             return OperationResult.Error(OperationResult.ErrorType.Unknown(e))
+        }
+    }
+
+    override suspend fun getIncidentById(incidentId: Long): OperationResult<IncidentModel> {
+        return try {
+            val entity = incidentDao.getIncidentById(
+                incidentId = incidentId
+            ) ?: return OperationResult.Error(OperationResult.ErrorType.Business(BusinessErrorCode.INCIDENT_NOT_FOUND))
+            OperationResult.Success(entityToModel.map(entity))
+        } catch (e: Exception) {
+            OperationResult.Error(OperationResult.ErrorType.Unknown(e))
         }
     }
 }

@@ -26,4 +26,7 @@ object ColorsCustom {
 
     val LightSurface = Color(0xFFD4F5FF) //BottomNavColor
     val LightOnSurface = Color(0xFF606B9A) //IconGrayColor
+
+    val IncidentVerified = Color(0xFFFF5722)
+    val IncidentPendingVerification = Color(0xFF828282)
 }

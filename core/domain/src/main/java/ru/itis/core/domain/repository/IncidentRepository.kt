@@ -10,8 +10,10 @@ import ru.itis.core.utils.properties.OtherProperties
  */
 interface IncidentRepository {
 
-    /** Добавление нового инцидента. */
-    suspend fun addIncident(incident: IncidentModel): OperationResult<Unit>
+    /** Добавление нового инцидента.
+     * Возвращает модель с присвоенным ID
+     */
+    suspend fun addIncident(incident: IncidentModel): OperationResult<IncidentModel>
 
     /**
      * Получение видимых инцидентов в заданной географической области.
@@ -42,4 +44,6 @@ interface IncidentRepository {
         confirmThreshold: Int = OtherProperties.CONFIRM_THRESHOLD,
         disputeThreshold: Int = OtherProperties.DISPUTE_THRESHOLD
     ): OperationResult<Unit>
+
+    suspend fun getIncidentById(incidentId: Long): OperationResult<IncidentModel>
 }

@@ -1,5 +1,6 @@
 package ru.itis.feature.map.impl.ui.mvi
 
+import ru.itis.core.domain.model.mark.IncidentModel
 import ru.itis.core.domain.model.mark.IncidentType
 import ru.itis.core.domain.model.mark.VerificationActionType
 
@@ -37,4 +38,16 @@ internal sealed interface MapScreenEvent {
         val incidentId: Long,
         val action: VerificationActionType
     ) : MapScreenEvent
+
+    /** Переключение режима редактирования карты */
+    data object OnToggleEditMode : MapScreenEvent
+
+    /** Тап по карте (только в режиме редактирования) */
+    data class OnMapTapped(val latitude: Double, val longitude: Double) : MapScreenEvent
+
+    /** Клик по метке инцидента */
+    data class OnIncidentClicked(val incident: IncidentModel) : MapScreenEvent
+
+    /** Закрытие диалога с деталями инцидента */
+    data object OnCloseIncidentDialog : MapScreenEvent
 }

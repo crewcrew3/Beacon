@@ -28,6 +28,7 @@ roomVersion = "2.8.4"
 #DI
 hilt = "2.57.2"
 hiltNavComposeVersion = "1.3.0"
+hiltNavFragmentVersion = "1.3.0"
 
 #навигация
 nav3Core = "1.0.0"
@@ -84,6 +85,7 @@ room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "roomVers
 hilt = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
 androidx-hilt-nav-compose = {group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavComposeVersion"}
+androidx-hilt-nav-fragment = {group = "androidx.hilt", name = "hilt-navigation-fragment", version.ref = "hiltNavFragmentVersion"}
 
 #навигация
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "nav3Core" }

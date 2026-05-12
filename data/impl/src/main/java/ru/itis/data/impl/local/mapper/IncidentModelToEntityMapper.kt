@@ -15,6 +15,7 @@ internal class IncidentModelToEntityMapper @Inject constructor() {
         return IncidentEntity(
             id = input.id,
             creatorId = input.creatorId,
+            creatorNickname = input.creatorNickname,
             latitude = input.latitude,
             longitude = input.longitude,
             incidentType = input.type.name,

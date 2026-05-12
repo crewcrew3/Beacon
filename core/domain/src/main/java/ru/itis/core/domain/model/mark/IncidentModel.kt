@@ -9,6 +9,7 @@ import java.time.LocalDateTime
 data class IncidentModel(
     val id: Long? = null,                    // ID в БД (null для новых меток)
     val creatorId: Long,                   // ID пользователя, создавшего метку
+    val creatorNickname: String,
     val latitude: Double,                    // Широта
     val longitude: Double,                   // Долгота
     val type: IncidentType,                  // Тип инцидента

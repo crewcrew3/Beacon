@@ -13,6 +13,9 @@ internal data class IncidentEntity(
     @ColumnInfo(name = "creator_id")
     val creatorId: Long,
 
+    @ColumnInfo(name = "creator_nickname")
+    val creatorNickname: String,
+
     @ColumnInfo(name = "latitude")
     val latitude: Double,
 
