@@ -2,6 +2,7 @@ package ru.itis.feature.map.impl.domain.usecase
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
+import ru.itis.core.domain.model.mark.IncidentModel
 import ru.itis.core.domain.model.mark.IncidentStatus
 import ru.itis.core.domain.model.mark.VerificationActionType
 import ru.itis.core.domain.qualifiers.IoDispatchers
@@ -33,7 +34,7 @@ internal class VerifyIncidentUseCase @Inject constructor(
         action: VerificationActionType,
         confirmThreshold: Int = OtherProperties.CONFIRM_THRESHOLD,
         disputeThreshold: Int = OtherProperties.DISPUTE_THRESHOLD
-    ): OperationResult<IncidentStatus> {
+    ): OperationResult<IncidentModel> {
         return withContext(dispatcher) {
             when (val currentUserResult = userRepository.getCurrentUser()) {
                 is OperationResult.Success -> {
@@ -50,17 +51,7 @@ internal class VerifyIncidentUseCase @Inject constructor(
                         disputeThreshold = disputeThreshold
                     )
 
-                    // Получаем актуальный статус из БД
-                    when(val updatedIncidentResult = incidentRepository.getIncidentById(incidentId)) {
-                        is OperationResult.Success -> {
-                            val updatedIncident = updatedIncidentResult.data
-                            OperationResult.Success(updatedIncident.status)
-                        }
-
-                        is OperationResult.Error -> {
-                            return@withContext OperationResult.Error(updatedIncidentResult.errorType)
-                        }
-                    }
+                    incidentRepository.getIncidentById(incidentId)
                 }
 
                 is OperationResult.Error -> {

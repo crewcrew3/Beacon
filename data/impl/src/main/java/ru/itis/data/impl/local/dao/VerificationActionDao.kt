@@ -26,4 +26,7 @@ internal interface VerificationActionDao {
         WHERE incident_id = :incidentId
     """)
     suspend fun getVerificationCounts(incidentId: Long): VerificationCounts
+
+    @Query("SELECT action_type FROM verification_actions WHERE incident_id = :incidentId AND user_id = :userId")
+    suspend fun getUserVote(incidentId: Long, userId: Long): String?
 }

@@ -76,6 +76,14 @@ internal class IncidentRepositoryImpl @Inject constructor(
                 OperationResult.ErrorType.Business(BusinessErrorCode.INCIDENT_NOT_FOUND)
             )
 
+            // Проверяем существующий голос
+            val existingVote = verificationDao.getUserVote(incidentId, userId)
+
+            // Если пользователь уже проголосовал так же - игнорируем
+            if (existingVote == action.name) {
+                return OperationResult.Success(Unit)
+            }
+
             // Сохраняем действие верификации (не проверяем, голосовал ли пользователь, тк можно изменить голос)
             verificationDao.insertVerificationAction(
                 VerificationActionEntity(

@@ -171,27 +171,22 @@ internal class MapScreenViewModel @Inject constructor(
                 is OperationResult.Success -> {
                     _pageEffect.emit(MapScreenEffect.Message(R.string.toast_msg_incident_voited))
 
-                    val actualStatus = result.data // достоверный статус из БД
-                    var incidentType = IncidentType.OTHER
+                    val updatedIncidentFromDb = result.data
+                    val incidentType = updatedIncidentFromDb.type
+                    val actualStatus = updatedIncidentFromDb.status
 
                     // Находим инцидент в текущем списке и обновляем
                     val currentState = _pageState.value
                     if (currentState is MapScreenState.IncidentsLoaded) {
                         val updatedIncidents = currentState.incidents.map { incident ->
-                            if (incident.id == incidentId) {
-                                incidentType = incident.type
-                                incident.copy(
-                                    status = actualStatus,
-                                    confirmCount = if (action == VerificationActionType.CONFIRM)
-                                        incident.confirmCount + 1 else incident.confirmCount,
-                                    disputeCount = if (action == VerificationActionType.DISPUTE)
-                                        incident.disputeCount + 1 else incident.disputeCount
-                                )
-                            } else {
-                                incident
-                            }
+                            if (incident.id == incidentId) updatedIncidentFromDb else incident
                         }
                         _pageState.value = MapScreenState.IncidentsLoaded(updatedIncidents)
+
+                        // Обновляем selectedIncident для диалога
+                        if (_selectedIncident.value?.id == incidentId) {
+                            _selectedIncident.value = updatedIncidentFromDb.copy()
+                        }
 
                         // Уведомляем рендерер об обновлении статуса
                         _pageEffect.emit(

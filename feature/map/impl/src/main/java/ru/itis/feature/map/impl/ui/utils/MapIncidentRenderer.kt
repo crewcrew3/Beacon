@@ -185,6 +185,8 @@ internal class MapIncidentRenderer(
         mapObjects.traverse(object : MapObjectVisitor {
             override fun onPlacemarkVisited(placemark: PlacemarkMapObject) {
                 // Проверяем, что userData содержит нужный ID и что это ещё не та метка, которую ищем
+                val userDataId = placemark.userData as? Long
+
                 if (!found && placemark.userData == incidentId) {
                     // Заменяем иконку на соответствующую новому статусу
                     placemark.setIcon(getIconForIncident(incidentType, newStatus))
