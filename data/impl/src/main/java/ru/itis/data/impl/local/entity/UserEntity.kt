@@ -16,7 +16,7 @@ internal data class UserEntity(
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "user_id")
-    var id: Int = 0,
+    var id: Long? = null,
 
     @ColumnInfo(name = "user_phone_number")
     var userPhoneNumber: String,

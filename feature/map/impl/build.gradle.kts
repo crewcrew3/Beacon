@@ -54,6 +54,7 @@ dependencies {
 
     //навигация
     implementation(libs.bundles.nav.deps)
+    implementation(libs.androidx.hilt.nav.fragment)
 
     //DI
     implementation(libs.hilt)

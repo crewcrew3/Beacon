@@ -15,12 +15,14 @@ private val LightColorScheme = lightColorScheme(
     onSecondary = ColorsCustom.LightOnSecondary,
     tertiary = ColorsCustom.LightTertiary,
     onTertiary = ColorsCustom.LightOnTertiary,
+    onTertiaryContainer = ColorsCustom.LightOnTertiaryContainer,
     background = ColorsCustom.LightBackground,
     error = ColorsCustom.LightError,
     surfaceVariant = ColorsCustom.LightSurfaceVariant,
     onSurfaceVariant = ColorsCustom.LightOnSurfaceVariant,
     surface = ColorsCustom.LightSurface,
     onSurface = ColorsCustom.LightOnSurface,
+    surfaceBright = ColorsCustom.LightSurfaceBright,
     surfaceContainerHigh = ColorsCustom.LightSurfaceContainerHigh,
 )
 

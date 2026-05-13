@@ -11,7 +11,8 @@ object ColorsCustom {
     val LightOnSecondary = Color(0xFF22315C) //PrimaryTextColor
 
     val LightTertiary = Color(0xFF8C6DFF) //Акцент
-    val LightOnTertiary = Color(0xFF606B9A) //SecondaryTextColor
+    val LightOnTertiary = Color(0xFFFFFFFF)
+    val LightOnTertiaryContainer = Color(0xFF606B9A) //SecondaryTextColor
 
     val LightBackground = Color.White
 
@@ -26,4 +27,10 @@ object ColorsCustom {
 
     val LightSurface = Color(0xFFD4F5FF) //BottomNavColor
     val LightOnSurface = Color(0xFF606B9A) //IconGrayColor
+    val LightSurfaceBright = Color(0xFFF1FBFF)
+
+    val IncidentVerified = Color(0xFFFF5722)
+    val IncidentPendingVerification = Color(0xFF828282)
+    val OnIncidentVerified = Color(0xFFFFE8DF)
+    val OnIncidentPendingVerification = Color(0xFF3D3D3D)
 }

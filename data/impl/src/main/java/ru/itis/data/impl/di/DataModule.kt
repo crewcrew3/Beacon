@@ -13,7 +13,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import ru.itis.core.utils.properties.PrefProperties
 import ru.itis.data.impl.local.LocalDatabase
+import ru.itis.data.impl.local.dao.IncidentDao
 import ru.itis.data.impl.local.dao.UserDao
+import ru.itis.data.impl.local.dao.VerificationActionDao
 import javax.inject.Singleton
 import ru.itis.data.impl.BuildConfig as dataConfig
 
@@ -43,5 +45,17 @@ class DataModule {
     @Singleton
     internal fun provideUserDao(database: LocalDatabase): UserDao {
         return database.userDao
+    }
+
+    @Provides
+    @Singleton
+    internal fun provideIncidentDao(database: LocalDatabase): IncidentDao {
+        return database.incidentDao
+    }
+
+    @Provides
+    @Singleton
+    internal fun provideVerificationActionDao(database: LocalDatabase): VerificationActionDao {
+        return database.verificationActionDao
     }
 }

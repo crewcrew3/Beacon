@@ -37,7 +37,7 @@ fun InputFieldCustom(
         placeholder = {
             Text(
                 text = text,
-                style = StylesCustom.body3,
+                style = StylesCustom.basicBodyTextStart,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
@@ -111,7 +111,7 @@ fun InputFieldCustom(
         if (inputFieldSettings.isError) {
             Text(
                 text = inputFieldSettings.errorText,
-                style = StylesCustom.body2,
+                style = StylesCustom.inputFieldSubText,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier
                     .padding(top = 8.dp, start = 8.dp)
@@ -124,7 +124,7 @@ fun InputFieldCustom(
 fun Label(text: String) {
     Text(
         text = text,
-        style = StylesCustom.body5,
+        style = StylesCustom.inputFieldLabel,
         color = MaterialTheme.colorScheme.onSecondary,
         modifier = Modifier
             .padding(bottom = 8.dp, start = 8.dp)

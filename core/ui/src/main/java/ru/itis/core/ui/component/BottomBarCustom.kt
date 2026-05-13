@@ -25,7 +25,7 @@ fun BottomBarCustom(
         containerColor = MaterialTheme.colorScheme.surface,
         contentColor = MaterialTheme.colorScheme.onSurface,
         modifier = Modifier
-            .height(DimensionsCustom.bottomNavHeight)
+            .height(DimensionsCustom.bottomBarHeight)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -38,7 +38,7 @@ fun BottomBarCustom(
                     imageVector = IconsCustom.mapIcon(),
                     contentDescription = "",
                     modifier = Modifier
-                        .size(DimensionsCustom.iconSizeMid)
+                        .size(DimensionsCustom.bottomBarIconSize)
                 )
             }
             IconButton(
@@ -48,7 +48,7 @@ fun BottomBarCustom(
                     imageVector = IconsCustom.profileIcon(),
                     contentDescription = "",
                     modifier = Modifier
-                        .size(DimensionsCustom.iconSizeMid)
+                        .size(DimensionsCustom.bottomBarIconSize)
                 )
             }
         }

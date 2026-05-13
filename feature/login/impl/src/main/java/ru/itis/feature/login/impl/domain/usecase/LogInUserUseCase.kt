@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import ru.itis.core.domain.qualifiers.IoDispatchers
 import ru.itis.core.domain.repository.AuthRepository
+import ru.itis.core.utils.OperationResult
 import javax.inject.Inject
 
 internal class LogInUserUseCase @Inject constructor(
@@ -13,12 +14,10 @@ internal class LogInUserUseCase @Inject constructor(
     suspend operator fun invoke(
         phoneNumber: String,
         password: String,
-    ) {
-        withContext(dispatcher) {
-            authRepository.logIn(
-                phoneNumber = phoneNumber,
-                password = password,
-            )
-        }
+    ): OperationResult<Unit> = withContext(dispatcher) {
+        authRepository.logIn(
+            phoneNumber = phoneNumber,
+            password = password,
+        )
     }
 }
