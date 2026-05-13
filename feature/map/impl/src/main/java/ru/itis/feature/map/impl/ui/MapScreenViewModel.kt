@@ -59,9 +59,11 @@ internal class MapScreenViewModel @Inject constructor(
         when (event) {
             is MapScreenEvent.OnProfileBottomBarClick -> bottomBarNavigator.toProfileScreen()
             is MapScreenEvent.OnMapBoundsChanged -> {
+                Log.i("RENDER_INCIDENT_DEBUG", "Map bounds changed")
                 loadIncidentsInBounds(event.bounds)
             }
             is MapScreenEvent.OnAddIncident -> {
+                Log.i("ADD_INCIDENT_DEBUG", "ViewModel event add incident worked")
                 addNewIncident(
                     latitude = event.latitude,
                     longitude = event.longitude,
@@ -80,7 +82,7 @@ internal class MapScreenViewModel @Inject constructor(
                 Log.i("ADD_INCIDENT_DEBUG", "Edit Mode: ${_isEditMode.value}")
             }
             is MapScreenEvent.OnMapTapped -> {
-                Log.i("ADD_INCIDENT_DEBUG", "ViewModel event worked. Edit Mode: ${_isEditMode.value}")
+                Log.i("ADD_INCIDENT_DEBUG", "ViewModel event show add incident dialog worked. Edit Mode: ${_isEditMode.value}")
                 // Реагируем на тап по карте только в режиме редактирования
                 if (_isEditMode.value) {
                     Log.i("ADD_INCIDENT_DEBUG", "Edit mode is ON")
@@ -108,14 +110,17 @@ internal class MapScreenViewModel @Inject constructor(
      * Вызывается при изменении позиции камеры карты.
      */
     private fun loadIncidentsInBounds(bounds: DoubleArray) {
+        Log.i("RENDER_INCIDENT_DEBUG", "ViewModel: loadIncidentsInBounds called with bounds: ${bounds.contentToString()}")
         viewModelScope.launch {
             _pageState.value = MapScreenState.Loading
 
             when (val result = getVisibleIncidentsUseCase(bounds)) {
                 is OperationResult.Success -> {
+                    Log.i("RENDER_INCIDENT_DEBUG", "ViewModel: Success! Loaded ${result.data.size} incidents")
                     _pageState.value = MapScreenState.IncidentsLoaded(result.data)
                 }
                 is OperationResult.Error -> {
+                    Log.e("RENDER_INCIDENT_DEBUG", "ViewModel: Error loading incidents: ${result.errorType}")
                     val messageResId = exceptionHandler.getErrorMessage(result.errorType)
                     _pageEffect.emit(MapScreenEffect.Message(messageResId))
                 }

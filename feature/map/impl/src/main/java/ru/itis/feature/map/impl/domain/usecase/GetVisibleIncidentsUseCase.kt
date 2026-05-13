@@ -29,11 +29,17 @@ internal class GetVisibleIncidentsUseCase @Inject constructor(
                     OperationResult.ErrorType.Business(BusinessErrorCode.INVALID_BOUNDS)
                 )
             }
+            val normalized = doubleArrayOf(
+                minOf(bounds[0], bounds[1]), // minLat
+                maxOf(bounds[0], bounds[1]), // maxLat
+                minOf(bounds[2], bounds[3]), // minLng
+                maxOf(bounds[2], bounds[3])  // maxLng
+            )
             incidentRepository.getVisibleIncidents(
-                minLat = bounds[0],
-                maxLat = bounds[1],
-                minLng = bounds[2],
-                maxLng = bounds[3]
+                minLat = normalized[0],
+                maxLat = normalized[1],
+                minLng = normalized[2],
+                maxLng = normalized[3]
             )
         }
     }

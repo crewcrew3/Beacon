@@ -9,7 +9,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.yandex.mapkit.geometry.Point
+import com.yandex.mapkit.map.CameraListener
 import com.yandex.mapkit.map.CameraPosition
+import com.yandex.mapkit.map.CameraUpdateReason
 import com.yandex.mapkit.map.InputListener
 import com.yandex.mapkit.mapview.MapView
 import com.yandex.mapkit.map.Map
@@ -95,6 +97,25 @@ class MapScreenFragment : Fragment(R.layout.fragment_map_screen) {
             )
 
             setupMapInputListener()
+
+            mapView.mapWindow.map.addCameraListener { map, cameraPosition, cameraUpdateReason, finished ->
+                // Загружаем инциденты только когда камера остановилась (чтобы не спамить запросами)
+                if (finished) {
+                    val visibleRegion = map.visibleRegion
+                    Log.i("RENDER_INCIDENT_DEBUG", "Camera stopped. Visible region: " +
+                            "lat[${visibleRegion.bottomLeft.latitude}..${visibleRegion.topRight.latitude}], " +
+                            "lng[${visibleRegion.bottomLeft.longitude}..${visibleRegion.topRight.longitude}]")
+                    // Отправляем границы видимой области в ViewModel
+                    delegate.onMapBoundsChanged(
+                        minLat = visibleRegion.bottomLeft.latitude,
+                        maxLat = visibleRegion.topRight.latitude,
+                        minLng = visibleRegion.bottomLeft.longitude,
+                        maxLng = visibleRegion.topRight.longitude
+                    )
+                }
+            }
+
+            loadInitialIncidents()
         }
     }
 
@@ -118,6 +139,23 @@ class MapScreenFragment : Fragment(R.layout.fragment_map_screen) {
             isListenerRegistered = true
             Log.i("MAP_DEBUG", "InputListener successfully registered")
         }
+    }
+
+    private fun loadInitialIncidents() {
+        // Дефолтные границы (примерно Москва и область)
+        val defaultBounds = doubleArrayOf(
+            55.5,   // minLat
+            56.0,   // maxLat
+            37.3,   // minLng
+            38.0    // maxLng
+        )
+        Log.i("RENDER_INCIDENT_DEBUG", "Sending initial bounds: $defaultBounds")
+        delegate.onMapBoundsChanged(
+            minLat = defaultBounds[0],
+            maxLat = defaultBounds[1],
+            minLng = defaultBounds[2],
+            maxLng = defaultBounds[3]
+        )
     }
 
     override fun onStart() {

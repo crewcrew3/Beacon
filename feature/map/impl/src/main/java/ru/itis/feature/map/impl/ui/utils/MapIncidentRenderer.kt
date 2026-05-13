@@ -1,7 +1,10 @@
 package ru.itis.feature.map.impl.ui.utils
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.PointF
+import android.util.Log
+import androidx.core.content.ContextCompat
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.map.CircleMapObject
 import com.yandex.mapkit.map.ClusterizedPlacemarkCollection
@@ -16,6 +19,7 @@ import ru.itis.core.domain.model.mark.IncidentModel
 import ru.itis.core.domain.model.mark.IncidentStatus
 import ru.itis.core.domain.model.mark.IncidentType
 import ru.itis.core.ui.R
+import androidx.core.graphics.createBitmap
 
 /**
  * Метод для отрисовки коллекции инцидентов на карте.
@@ -36,12 +40,14 @@ internal class MapIncidentRenderer(
      * Вызывается при получении обновлённого списка из ViewModel.
      */
     fun renderIncidents(incidents: List<IncidentModel>) {
+        Log.i("RENDER_INCIDENT_DEBUG", "Renderer: renderIncidents called with ${incidents.size} incidents")
         // Удаляем все предыдущие объекты
         mapObjects.clear()
 
         incidents.forEach { incident ->
             // Пропускаем архивированные - они не должны отображаться
             if (incident.status == IncidentStatus.ARCHIVED) return@forEach
+            Log.i("RENDER_INCIDENT_DEBUG", "Renderer: Adding placemark #${incident.id} at (${incident.latitude}, ${incident.longitude}), status=${incident.status}")
 
             val placemark = mapObjects.addPlacemark().apply {
                 geometry = Point(incident.latitude, incident.longitude)
@@ -80,63 +86,84 @@ internal class MapIncidentRenderer(
             val drawableResId = when (type) {
                 IncidentType.POOR_LIGHTING -> {
                     if (status == IncidentStatus.VERIFIED) {
-                        R.drawable.ic_lighting_warning
+                        //R.drawable.ic_lighting_warning_verified
+                        R.drawable.ic_placeholder
                     } else {
-                        //R.drawable.ic_lighting_warning_gray
-                        R.drawable.ic_placeholder //временно
+                        R.drawable.ic_lighting_warning
                     }
                 }
                 IncidentType.HARASSMENT -> {
                     if (status == IncidentStatus.VERIFIED) {
-                        R.drawable.ic_harassment
-                    } else {
-                        //R.drawable.ic_harassment_gray
+                        //R.drawable.ic_harassment_verified
                         R.drawable.ic_placeholder
+                    } else {
+                        R.drawable.ic_harassment
                     }
                 }
                 IncidentType.PICKPOCKETING -> {
                     if (status == IncidentStatus.VERIFIED) {
-                        R.drawable.ic_pickpocket
-                    } else {
+                        //R.drawable.ic_pickpocket_verified
                         R.drawable.ic_placeholder
-                        //R.drawable.ic_pickpocket_gray
+                    } else {
+                        R.drawable.ic_pickpocket
                     }
                 }
                 IncidentType.ROBBERY -> {
                     if (status == IncidentStatus.VERIFIED) {
-                        R.drawable.ic_robbery
-                    } else {
+                        //R.drawable.ic_robbery_verified
                         R.drawable.ic_placeholder
-                        //R.drawable.ic_robbery_gray
+                    } else {
+                        R.drawable.ic_pickpocket
                     }
                 }
                 IncidentType.SUSPICIOUS_PERSON -> {
                     if (status == IncidentStatus.VERIFIED) {
-                        R.drawable.ic_suspicious
-                    } else {
+                        //R.drawable.ic_suspicious_verified
                         R.drawable.ic_placeholder
-                        //R.drawable.ic_suspicious_gray
+                    } else {
+                        R.drawable.ic_suspicious
                     }
                 }
                 IncidentType.BAD_ROAD -> {
                     if (status == IncidentStatus.VERIFIED) {
-                        R.drawable.ic_bad_road
-                    } else {
+                        //R.drawable.ic_bad_road_verified
                         R.drawable.ic_placeholder
-                        //R.drawable.ic_bad_road_gray
+                    } else {
+                        R.drawable.ic_bad_road
                     }
                 }
                 IncidentType.OTHER -> {
                     if (status == IncidentStatus.VERIFIED) {
-                        R.drawable.ic_other
-                    } else {
+                        //R.drawable.ic_other_verified
                         R.drawable.ic_placeholder
-                        //R.drawable.ic_other_gray
+                    } else {
+                        R.drawable.ic_other
                     }
                 }
             }
-            ImageProvider.fromResource(context, drawableResId)
+            // Конвертируем в Bitmap и создаём ImageProvider
+            val bitmap = drawableToBitmap(drawableResId)
+            ImageProvider.fromBitmap(bitmap)
         }
+    }
+
+    /**
+     * Конвертирует Drawable (PNG/XML) в Bitmap для использования в ImageProvider.
+     */
+    private fun drawableToBitmap(drawableResId: Int): Bitmap {
+        val drawable = ContextCompat.getDrawable(context, drawableResId)
+            ?: throw IllegalArgumentException("Drawable not found: $drawableResId")
+
+        val width = drawable.intrinsicWidth.takeIf { it > 0 } ?: 96
+        val height = drawable.intrinsicHeight.takeIf { it > 0 } ?: 96
+
+        drawable.setBounds(0, 0, width, height)
+
+        val bitmap = createBitmap(width, height)
+        val canvas = android.graphics.Canvas(bitmap)
+        drawable.draw(canvas)
+
+        return bitmap
     }
 
     /**

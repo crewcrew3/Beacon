@@ -65,6 +65,19 @@ internal fun MapScreenHost() {
             override fun onIncidentClicked(incident: IncidentModel) {
                 viewModel.processEvent(MapScreenEvent.OnIncidentClicked(incident))
             }
+
+            override fun onMapBoundsChanged(
+                minLat: Double,
+                maxLat: Double,
+                minLng: Double,
+                maxLng: Double
+            ) {
+                viewModel.processEvent(
+                    MapScreenEvent.OnMapBoundsChanged(
+                        bounds = doubleArrayOf(minLat, maxLat, minLng, maxLng)
+                    )
+                )
+            }
         }
     }
 
@@ -112,12 +125,16 @@ internal fun MapScreenHost() {
 
     // Подписка на состояние для первоначальной отрисовки
     LaunchedEffect(pageState) {
+        Log.i("RENDER_INCIDENT_DEBUG", "Compose: pageState changed to: ${pageState::class.simpleName}")
         if (pageState is MapScreenState.IncidentsLoaded) {
+            Log.i("RENDER_INCIDENT_DEBUG", "Compose: Calling frag.renderIncidents with ${(pageState as MapScreenState.IncidentsLoaded).incidents.size} items")
             fragmentManager.findFragmentById(containerId)?.let { frag ->
                 if (frag is MapScreenFragment) {
                     frag.renderIncidents((pageState as MapScreenState.IncidentsLoaded).incidents)
+                } else {
+                    Log.e("RENDER_INCIDENT_DEBUG", "Compose: Fragment found but wrong type: ${frag::class}")
                 }
-            }
+            } ?: Log.e("RENDER_INCIDENT_DEBUG", "Compose: Fragment not found by id $containerId")
         }
     }
 
