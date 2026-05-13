@@ -16,5 +16,5 @@ data class ButtonSettings(
     val contentColor: Color? = null,
     val shape: Shape = RoundedCornerShape(DimensionsCustom.roundedCorners),
     val height: Dp = DimensionsCustom.btnHeight,
-    val textStyle: TextStyle = StylesCustom.body3,
+    val textStyle: TextStyle = StylesCustom.basicBodyTextCenter,
 )

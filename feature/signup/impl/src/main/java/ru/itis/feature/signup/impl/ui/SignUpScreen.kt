@@ -96,8 +96,8 @@ internal fun SignUpScreen(
                 ) {
                     Text(
                         text = stringResource(R.string.registration_screen_header),
-                        color = MaterialTheme.colorScheme.onTertiary,
-                        style = StylesCustom.h1,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer,
+                        style = StylesCustom.authBodyText,
                         fontSize = 24.sp,
                     )
                 }

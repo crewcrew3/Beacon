@@ -88,7 +88,7 @@ internal fun ProfileScreen(
             item {
                 Text(
                     text = stringResource(R.string.title_profile),
-                    style = StylesCustom.h5,
+                    style = StylesCustom.profileHeader,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -111,9 +111,9 @@ internal fun ProfileScreen(
                         )
                         Text(
                             text = stringResource(R.string.profile_screen_unauth),
-                            style = StylesCustom.h4,
+                            style = StylesCustom.profileUnauthBodyText,
                             textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.onTertiary,
+                            color = MaterialTheme.colorScheme.onTertiaryContainer,
                             modifier = Modifier
                                 .padding(bottom = DimensionsCustom.defaultSpacer)
                         )
@@ -173,7 +173,7 @@ internal fun ProfileScreen(
                                         tint = MaterialTheme.colorScheme.onSurface,
                                         contentDescription = "",
                                         modifier = Modifier
-                                            .size(DimensionsCustom.iconSizeMax)
+                                            .size(DimensionsCustom.profileAvatarIconSize)
                                     )
                                 }
                             }
@@ -185,7 +185,7 @@ internal fun ProfileScreen(
 
                             Text(
                                 text = profile.nickname,
-                                style = StylesCustom.h9,
+                                style = StylesCustom.profileNickname,
                                 color = MaterialTheme.colorScheme.onSecondary,
                                 modifier = Modifier
                                     .padding(bottom = DimensionsCustom.defaultSpacer)
@@ -193,8 +193,8 @@ internal fun ProfileScreen(
 
                             Text(
                                 text = profile.phoneNumber,
-                                style = StylesCustom.body8,
-                                color = MaterialTheme.colorScheme.onTertiary,
+                                style = StylesCustom.profilePhoneNumber,
+                                color = MaterialTheme.colorScheme.onTertiaryContainer,
                             )
 
                             ProfileTab(
@@ -237,11 +237,11 @@ internal fun ProfileTab(
             tint = iconColor,
             modifier = Modifier
                 .padding(start = 20.dp)
-                .size(DimensionsCustom.iconSizeMaxi)
+                .size(DimensionsCustom.profileTabIconSize)
         )
         Text(
             text = tabHeader,
-            style = StylesCustom.h2,
+            style = StylesCustom.profileTabText,
             color = textColor,
             modifier = Modifier
                 .padding(start = 24.dp)

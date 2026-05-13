@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -29,6 +30,8 @@ import ru.itis.core.domain.model.mark.IncidentModel
 import ru.itis.core.ui.BaseScreen
 import ru.itis.core.ui.R
 import ru.itis.core.ui.component.settings.BottomBarSettings
+import ru.itis.core.ui.theme.BeaconTheme
+import ru.itis.core.ui.theme.DimensionsCustom
 import ru.itis.core.ui.theme.IconsCustom
 import ru.itis.core.ui.theme.StylesCustom
 import ru.itis.feature.map.impl.ui.components.AddIncidentDialog
@@ -144,7 +147,7 @@ internal fun MapScreenHost() {
         ) {
             Surface(
                 onClick = { viewModel.processEvent(MapScreenEvent.OnToggleEditMode) },
-                shape = RoundedCornerShape(24.dp),
+                shape = RoundedCornerShape(DimensionsCustom.roundedCornersMid),
                 color = if (isEditMode)
                     MaterialTheme.colorScheme.primary
                 else
@@ -170,7 +173,7 @@ internal fun MapScreenHost() {
                             stringResource(R.string.map_screen_edit_mode_on)
                         else
                             stringResource(R.string.map_screen_edit_mode_off),
-                        style = StylesCustom.body3,
+                        style = StylesCustom.basicBodyTextCenter,
                         color = if (isEditMode)
                             MaterialTheme.colorScheme.onPrimary
                         else
@@ -210,5 +213,13 @@ internal fun MapScreenHost() {
                 }
             )
         }
+    }
+}
+
+@Composable
+@Preview(showBackground = true)
+internal fun MapScreenHostPreview() {
+    BeaconTheme {
+        MapScreenHost()
     }
 }

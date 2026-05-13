@@ -11,7 +11,7 @@ data class InputFieldSettings(
     val labelText: String? = null,
     val placeholderText: String? = null,
     val isError: Boolean = false,
-    val textStyle: TextStyle = StylesCustom.body3,
+    val textStyle: TextStyle = StylesCustom.basicBodyTextStart,
     val shape: Shape = RoundedCornerShape(DimensionsCustom.roundedCorners),
     val errorText: String = "",
     val startValue: String = "",

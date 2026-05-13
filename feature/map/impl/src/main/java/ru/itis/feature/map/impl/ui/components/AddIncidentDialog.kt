@@ -3,6 +3,7 @@ package ru.itis.feature.map.impl.ui.components
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -19,6 +20,11 @@ import ru.itis.core.domain.model.mark.IncidentType
 import ru.itis.core.ui.theme.BeaconTheme
 import ru.itis.core.ui.theme.StylesCustom
 import ru.itis.core.ui.R
+import ru.itis.core.ui.component.InputFieldCustom
+import ru.itis.core.ui.component.PrimaryButtonCustom
+import ru.itis.core.ui.component.settings.ButtonSettings
+import ru.itis.core.ui.component.settings.InputFieldSettings
+import ru.itis.core.ui.theme.DimensionsCustom
 
 /**
  * Диалог для выбора типа инцидента и ввода описания при добавлении новой метки.
@@ -38,43 +44,43 @@ internal fun AddIncidentDialog(
     Dialog(onDismissRequest = onDismissRequest) {
         Surface(
             modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .padding(16.dp),
-            shape = RoundedCornerShape(16.dp),
-            color = MaterialTheme.colorScheme.surface
+                .fillMaxWidth()
+                .padding(8.dp),
+            shape = RoundedCornerShape(DimensionsCustom.roundedCorners),
+            color = MaterialTheme.colorScheme.surfaceBright
         ) {
             Column(
                 modifier = Modifier
-                    .padding(24.dp)
+                    .padding(16.dp)
                     .verticalScroll(rememberScrollState())
             ) {
                 Text(
                     text = stringResource(R.string.add_incident_dialog_header),
-                    style = StylesCustom.h4,
+                    style = StylesCustom.dialogHeader,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
 
                 Text(
                     text = stringResource(R.string.add_incident_dialog_type_header),
-                    style = StylesCustom.body2,
+                    style = StylesCustom.basicBodyTextStart,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
 
-                Row(
+                FlowRow (
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     incidentTypes.forEach { type ->
                         val isSelected = selectedType == type
                         Surface(
                             modifier = Modifier
-                                .weight(1f)
                                 .clickable { selectedType = type },
-                            shape = RoundedCornerShape(8.dp),
+                            shape = RoundedCornerShape(DimensionsCustom.roundedCornersSmall),
                             color = if (isSelected)
                                 MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
                             else
@@ -82,14 +88,14 @@ internal fun AddIncidentDialog(
                             border = if (isSelected)
                                 BorderStroke(
                                     width = 2.dp,
-                                    color = MaterialTheme.colorScheme.primary,
+                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
                                 )
                             else
                                 null
                         ) {
                             Text(
                                 text = type.name.replace("_", " "),
-                                style = StylesCustom.body3,
+                                style = StylesCustom.basicBodySubTextCenter,
                                 color = MaterialTheme.colorScheme.onSurface,
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.padding(8.dp)
@@ -98,44 +104,45 @@ internal fun AddIncidentDialog(
                     }
                 }
 
-                // Поле описания
                 Text(
                     text = stringResource(R.string.add_incident_dialog_details_header),
-                    style = StylesCustom.body2,
+                    style = StylesCustom.basicBodyTextStart,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    modifier = Modifier.padding(vertical = 8.dp)
                 )
-                OutlinedTextField(
-                    value = description,
-                    onValueChange = { description = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 24.dp),
-                    placeholder = { Text(stringResource(R.string.add_incident_dialog_details_placeholder)) },
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+
+                InputFieldCustom(
+                    inputFieldSettings = InputFieldSettings(
+                        placeholderText = stringResource(R.string.add_incident_dialog_details_placeholder),
+                        startValue = description,
+                        onValueChange = { description = it },
+                        modifier = Modifier.padding(bottom = 24.dp)
                     )
                 )
 
-                // Кнопки действий
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
+                    horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    TextButton(onClick = onDismissRequest) {
-                        Text(stringResource(R.string.btn_cancel), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    TextButton(
+                        onClick = onDismissRequest,
+                        modifier = Modifier.fillMaxWidth(0.5f)
+                    ) {
+                        Text(
+                            text =stringResource(R.string.btn_cancel),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            style = StylesCustom.basicBodySubTextCenter
+                        )
                     }
                     Spacer(modifier = Modifier.width(8.dp))
-                    Button(
-                        onClick = { onConfirm(selectedType, description.takeIf { it.isNotBlank() }) },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary
+                    PrimaryButtonCustom(
+                        buttonSettings = ButtonSettings(
+                            onClick = { onConfirm(selectedType, description.takeIf { it.isNotBlank() }) },
+                            text = stringResource(R.string.btn_save_text),
+                            textStyle = StylesCustom.basicBodySubTextCenter
                         )
-                    ) {
-                        Text(stringResource(R.string.btn_save_text), color = MaterialTheme.colorScheme.onPrimary)
-                    }
+                    )
                 }
             }
         }

@@ -55,7 +55,7 @@
 
     <string name="add_incident_dialog_header">Добавить инцидент</string>
     <string name="add_incident_dialog_type_header">Укажите тип инцидента</string>
-    <string name="add_incident_dialog_details_header">Описание(необязательно)</string>
+    <string name="add_incident_dialog_details_header">Описание (необязательно)</string>
     <string name="add_incident_dialog_details_placeholder">Детали инцидента…</string>
 
     <string name="map_screen_edit_mode_on">Режим: добавление</string>
