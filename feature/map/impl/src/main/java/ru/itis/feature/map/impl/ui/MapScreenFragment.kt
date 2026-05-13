@@ -45,6 +45,7 @@ class MapScreenFragment : Fragment(R.layout.fragment_map_screen) {
 
     //Сильная ссылка на слушатель предотвращает его удаление сборщиком мусора.
     private lateinit var mapInputListener: InputListener
+    private lateinit var mapCameraListener: CameraListener
     private var isListenerRegistered = false
 
     /**
@@ -97,26 +98,32 @@ class MapScreenFragment : Fragment(R.layout.fragment_map_screen) {
             )
 
             setupMapInputListener()
-
-            mapView.mapWindow.map.addCameraListener { map, cameraPosition, cameraUpdateReason, finished ->
-                // Загружаем инциденты только когда камера остановилась (чтобы не спамить запросами)
-                if (finished) {
-                    val visibleRegion = map.visibleRegion
-                    Log.i("RENDER_INCIDENT_DEBUG", "Camera stopped. Visible region: " +
-                            "lat[${visibleRegion.bottomLeft.latitude}..${visibleRegion.topRight.latitude}], " +
-                            "lng[${visibleRegion.bottomLeft.longitude}..${visibleRegion.topRight.longitude}]")
-                    // Отправляем границы видимой области в ViewModel
-                    delegate.onMapBoundsChanged(
-                        minLat = visibleRegion.bottomLeft.latitude,
-                        maxLat = visibleRegion.topRight.latitude,
-                        minLng = visibleRegion.bottomLeft.longitude,
-                        maxLng = visibleRegion.topRight.longitude
-                    )
-                }
-            }
-
+            setupMapCameraListener()
             loadInitialIncidents()
         }
+    }
+
+    private fun setupMapCameraListener() {
+        mapCameraListener = CameraListener { map, cameraPosition, cameraUpdateReason, finished ->
+            // Загружаем инциденты только когда камера остановилась (чтобы не спамить запросами)
+            if (finished) {
+                val visibleRegion = map.visibleRegion
+                Log.i("RENDER_INCIDENT_DEBUG", "Camera stopped. Visible region: " +
+                        "lat[${visibleRegion.bottomLeft.latitude}..${visibleRegion.topRight.latitude}], " +
+                        "lng[${visibleRegion.bottomLeft.longitude}..${visibleRegion.topRight.longitude}]")
+                // Отправляем границы видимой области в ViewModel
+                delegate.onMapBoundsChanged(
+                    minLat = visibleRegion.bottomLeft.latitude,
+                    maxLat = visibleRegion.topRight.latitude,
+                    minLng = visibleRegion.bottomLeft.longitude,
+                    maxLng = visibleRegion.topRight.longitude
+                )
+            }
+        }
+
+        // Добавляем слушатель на карту
+        mapView.mapWindow.map.addCameraListener(mapCameraListener)
+        Log.i("MAP_DEBUG", "CameraListener successfully registered")
     }
 
     private fun setupMapInputListener() {
@@ -172,5 +179,10 @@ class MapScreenFragment : Fragment(R.layout.fragment_map_screen) {
         super.onDestroyView()
         _viewBinding = null
         isListenerRegistered = false
+        // Очищаем кэш слушателей в рендерере
+        if (::incidentRenderer.isInitialized) {
+            incidentRenderer.clearListeners()
+        }
+        mapView.mapWindow.map.removeCameraListener(mapCameraListener)
     }
 }

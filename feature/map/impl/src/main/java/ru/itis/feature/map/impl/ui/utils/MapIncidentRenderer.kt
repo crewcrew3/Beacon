@@ -20,6 +20,7 @@ import ru.itis.core.domain.model.mark.IncidentStatus
 import ru.itis.core.domain.model.mark.IncidentType
 import ru.itis.core.ui.R
 import androidx.core.graphics.createBitmap
+import com.yandex.mapkit.map.MapObjectTapListener
 
 /**
  * Метод для отрисовки коллекции инцидентов на карте.
@@ -35,42 +36,50 @@ internal class MapIncidentRenderer(
     // Кэш ImageProvider для каждого типа инцидента
     private val iconCache = mutableMapOf<String, ImageProvider>()
 
+    // Храним слушатели тапов с сильными ссылками, ключ = incident.id
+    private val tapListeners = mutableMapOf<Long, MapObjectTapListener>()
+
     /**
      * Очищает все существующие метки инцидентов и отрисовывает новые.
      * Вызывается при получении обновлённого списка из ViewModel.
      */
     fun renderIncidents(incidents: List<IncidentModel>) {
         Log.i("RENDER_INCIDENT_DEBUG", "Renderer: renderIncidents called with ${incidents.size} incidents")
-        // Удаляем все предыдущие объекты
+        // Удаляем все предыдущие объекты и кэш слушателей
         mapObjects.clear()
+        tapListeners.clear()
 
         incidents.forEach { incident ->
             // Пропускаем архивированные - они не должны отображаться
             if (incident.status == IncidentStatus.ARCHIVED) return@forEach
-            Log.i("RENDER_INCIDENT_DEBUG", "Renderer: Adding placemark #${incident.id} at (${incident.latitude}, ${incident.longitude}), status=${incident.status}")
-
-            val placemark = mapObjects.addPlacemark().apply {
-                geometry = Point(incident.latitude, incident.longitude)
-
-                // Устанавливаем иконку в зависимости от типа инцидента и статуса
-                setIcon(getIconForIncident(incident.type, incident.status))
-
-                // Настраиваем стиль: привязка к низу иконки, масштаб
-                setIconStyle(
-                    IconStyle().apply {
-                        anchor = PointF(0.5f, 1.0f)
-                        scale = 0.8f
-                    }
+            incident.id?.let { incidentId ->
+                Log.i(
+                    "RENDER_INCIDENT_DEBUG",
+                    "Renderer: Adding placemark #${incidentId} at (${incident.latitude}, ${incident.longitude}), status=${incident.status}"
                 )
 
-                // Сохраняем ID инцидента в тег для последующего получения при клике
-                userData = incident.id
-            }
+                val tapListener = MapObjectTapListener { mapObject, point ->
+                    Log.i("TAP_INCIDENT_DEBUG", "Placemark tapped: id=$incidentId, type=${incident.type}")
+                    onIncidentClicked(incident)
+                    true // событие обработано, не передавать дальше
+                }
 
-            placemark.addTapListener { _, _ ->
-                onIncidentClicked(incident)
-                // Возвращаем true, чтобы событие не передавалось дальше (например, не срабатывал клик по карте)
-                true
+                tapListeners[incidentId] = tapListener
+
+                val placemark = mapObjects.addPlacemark().apply {
+                    geometry = Point(incident.latitude, incident.longitude)
+                    setIcon(getIconForIncident(incident.type, incident.status))
+                    setIconStyle(
+                        IconStyle().apply {
+                            anchor = PointF(0.5f, 1.0f)
+                            scale = 0.8f
+                        }
+                    )
+                    // Сохраняем ID инцидента в тег для последующего получения при клике
+                    userData = incidentId
+                }
+
+                placemark.addTapListener(tapListener)
             }
         }
     }
@@ -113,7 +122,7 @@ internal class MapIncidentRenderer(
                         //R.drawable.ic_robbery_verified
                         R.drawable.ic_placeholder
                     } else {
-                        R.drawable.ic_pickpocket
+                        R.drawable.ic_robbery
                     }
                 }
                 IncidentType.SUSPICIOUS_PERSON -> {
@@ -200,21 +209,32 @@ internal class MapIncidentRenderer(
         // Не добавляем архивированные
         if (incident.status == IncidentStatus.ARCHIVED) return
 
-        val placemark = mapObjects.addPlacemark().apply {
-            geometry = Point(incident.latitude, incident.longitude)
-            setIcon(getIconForIncident(incident.type, incident.status))
-            setIconStyle(
-                IconStyle().apply {
-                    anchor = PointF(0.5f, 1.0f)
-                    scale = 0.8f
-                }
-            )
-            userData = incident.id
-        }
+        incident.id?.let { incidentId ->
+            val tapListener = MapObjectTapListener { mapObject, point ->
+                Log.i("TAP_INCIDENT_DEBUG", "New placemark tapped: id=$incidentId")
+                onIncidentClicked(incident)
+                true
+            }
 
-        placemark.addTapListener { _, _ ->
-            onIncidentClicked(incident)
-            true
+            tapListeners[incidentId] = tapListener
+
+            val placemark = mapObjects.addPlacemark().apply {
+                geometry = Point(incident.latitude, incident.longitude)
+                setIcon(getIconForIncident(incident.type, incident.status))
+                setIconStyle(
+                    IconStyle().apply {
+                        anchor = PointF(0.5f, 1.0f)
+                        scale = 0.8f
+                    }
+                )
+                userData = incidentId
+            }
+
+            placemark.addTapListener(tapListener)
         }
+    }
+
+    fun clearListeners() {
+        tapListeners.clear()
     }
 }

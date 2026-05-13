@@ -35,11 +35,20 @@ internal class GetVisibleIncidentsUseCase @Inject constructor(
                 minOf(bounds[2], bounds[3]), // minLng
                 maxOf(bounds[2], bounds[3])  // maxLng
             )
+
+            val padding = 0.001
+            val padded = doubleArrayOf(
+                normalized[0] - padding, // minLat
+                normalized[1] + padding, // maxLat
+                normalized[2] - padding, // minLng
+                normalized[3] + padding  // maxLng
+            )
+
             incidentRepository.getVisibleIncidents(
-                minLat = normalized[0],
-                maxLat = normalized[1],
-                minLng = normalized[2],
-                maxLng = normalized[3]
+                minLat = padded [0],
+                maxLat = padded [1],
+                minLng = padded [2],
+                maxLng = padded [3]
             )
         }
     }

@@ -97,6 +97,7 @@ internal class MapScreenViewModel @Inject constructor(
                 }
             }
             is MapScreenEvent.OnIncidentClicked -> {
+                Log.i("TAP_INCIDENT_DEBUG", "ViewModel received OnIncidentClicked: id=${event.incident.id}")
                 _selectedIncident.value = event.incident
             }
             is MapScreenEvent.OnCloseIncidentDialog -> {

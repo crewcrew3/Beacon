@@ -1,5 +1,6 @@
 package ru.itis.feature.map.impl.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -37,6 +38,7 @@ internal fun IncidentDetailDialog(
     onDismissRequest: () -> Unit,
     onVerify: (VerificationActionType) -> Unit
 ) {
+    Log.i("TAP_INCIDENT_DEBUG", "IncidentDetailDialog composed for incident id=${incident.id}")
     Dialog(onDismissRequest = onDismissRequest) {
         Surface(
             modifier = Modifier

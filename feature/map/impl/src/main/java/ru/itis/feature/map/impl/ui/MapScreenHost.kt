@@ -51,6 +51,10 @@ internal fun MapScreenHost() {
 
     val pageState by viewModel.pageState.collectAsState(initial = MapScreenState.Initial)
     val selectedIncident by viewModel.selectedIncident.collectAsState()
+    LaunchedEffect(selectedIncident) {
+        Log.i("TAP_INCIDENT_DEBUG", "selectedIncident changed: ${selectedIncident?.id ?: "null"}")
+    }
+
     val isEditMode by viewModel.isEditMode.collectAsState()
 
     var showAddDialog by remember { mutableStateOf(false) }
