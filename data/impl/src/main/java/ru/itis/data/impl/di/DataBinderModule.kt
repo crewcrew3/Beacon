@@ -5,18 +5,25 @@ import dagger.Module
 import dagger.Reusable
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import ru.itis.core.domain.initializer.InitialDataLoader
 import ru.itis.core.domain.storage.BasicUserDataStorage
 import ru.itis.core.domain.repository.AuthRepository
 import ru.itis.core.domain.repository.IncidentRepository
 import ru.itis.core.domain.repository.UserRepository
+import ru.itis.data.impl.initializer.DataInitializerImpl
 import ru.itis.data.impl.local.storage.BasicUserDataStorageImpl
 import ru.itis.data.impl.repository.AuthRepositoryImpl
 import ru.itis.data.impl.repository.IncidentRepositoryImpl
 import ru.itis.data.impl.repository.UserRepositoryImpl
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 internal interface DataBinderModule {
+
+    @Binds
+    @Singleton
+    fun bindInitialDataLoader(impl: DataInitializerImpl): InitialDataLoader
 
     @Binds
     @Reusable

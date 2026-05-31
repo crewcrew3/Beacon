@@ -41,4 +41,6 @@ dependencies {
     //DI
     implementation(libs.hilt)
     ksp(libs.hilt.compiler)
+
+    implementation(libs.yandex.maps)
 }

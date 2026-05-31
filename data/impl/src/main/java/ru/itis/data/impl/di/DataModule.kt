@@ -1,4 +1,4 @@
-package ru.itis.gloriaartis.data.impl.di
+package ru.itis.data.impl.di
 
 import android.app.Application
 import android.content.Context
@@ -14,6 +14,8 @@ import dagger.hilt.components.SingletonComponent
 import ru.itis.core.utils.properties.PrefProperties
 import ru.itis.data.impl.local.LocalDatabase
 import ru.itis.data.impl.local.dao.IncidentDao
+import ru.itis.data.impl.local.dao.LightingPoleDao
+import ru.itis.data.impl.local.dao.SafetyCameraDao
 import ru.itis.data.impl.local.dao.UserDao
 import ru.itis.data.impl.local.dao.VerificationActionDao
 import javax.inject.Singleton
@@ -57,5 +59,17 @@ class DataModule {
     @Singleton
     internal fun provideVerificationActionDao(database: LocalDatabase): VerificationActionDao {
         return database.verificationActionDao
+    }
+
+    @Provides
+    @Singleton
+    internal fun provideLightingPoleDao(database: LocalDatabase): LightingPoleDao {
+        return database.lightingPoleDao
+    }
+
+    @Provides
+    @Singleton
+    internal fun provideSafetyCameraDao(database: LocalDatabase): SafetyCameraDao {
+        return database.safetyCameraDao
     }
 }

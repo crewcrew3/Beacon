@@ -54,9 +54,12 @@ dependencies {
     implementation(libs.room)
     implementation(libs.room.ktx)
     ksp(libs.room.ksp)
+    implementation(libs.mongo.db)
     //datasore
     implementation(libs.datastore.prefs)
     //DI
     implementation(libs.hilt)
     ksp(libs.hilt.compiler)
+
+    implementation(libs.yandex.maps)
 }

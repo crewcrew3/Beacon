@@ -18,6 +18,7 @@ kspVersion = "2.1.20-2.0.0"
 
 #бд
 roomVersion = "2.8.4"
+mongoDb = "5.7.0"
 
 #сеть
 #retrofitVersion = "3.0.0"
@@ -73,6 +74,7 @@ coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp"
 room = { group = "androidx.room", name = "room-runtime", version.ref = "roomVersion" }
 room-ksp = { group = "androidx.room", name = "room-compiler", version.ref = "roomVersion" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "roomVersion"}
+mongo-db = {group = "org.mongodb", name = "bson", version.ref = "mongoDb"}
 
 #сеть
 #retrofit = {group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofitVersion"}
