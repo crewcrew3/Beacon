@@ -61,7 +61,6 @@
     <string name="map_screen_edit_mode_on">Режим: добавление</string>
     <string name="map_screen_edit_mode_off">Режим: просмотр</string>
 
-    <!-- Route building strings -->
     <string name="route_selection_title">Построение безопасного маршрута</string>
     <string name="route_start_placeholder">Начальная точка (адрес или тап по карте)</string>
     <string name="route_end_placeholder">Конечная точка (адрес или тап по карте)</string>
@@ -72,4 +71,6 @@
     <string name="toast_msg_route_built">Маршрут построен</string>
     <string name="toast_msg_route_error">Не удалось построить маршрут</string>
     <string name="btn_enter_route_mode">Построить маршрут</string>
+    <string name="btn_collapse_route_panel">Свернуть</string>
+    <string name="btn_expand_route_panel">Развернуть</string>
 </resources>

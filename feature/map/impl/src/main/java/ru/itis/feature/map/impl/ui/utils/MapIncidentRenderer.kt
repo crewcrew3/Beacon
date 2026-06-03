@@ -2,7 +2,6 @@ package ru.itis.feature.map.impl.ui.utils
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.Color
 import android.graphics.PointF
 import android.util.Log
 import androidx.compose.ui.graphics.toArgb
@@ -38,6 +37,18 @@ internal class MapIncidentRenderer(
     private val mapObjects: MapObjectCollection,
     private val onIncidentClicked: (IncidentModel) -> Unit
 ) {
+
+    // Маркеры точек маршрута (начальная/конечная)
+    private var startPointMarker: PlacemarkMapObject? = null
+    private var endPointMarker: PlacemarkMapObject? = null
+
+    // Кэш иконок для маркеров маршрута
+    private val routePointIconCache = mutableMapOf<RoutePointType, ImageProvider>()
+
+    enum class RoutePointType {
+        START,  // начальная точка
+        END     // конечная точка
+    }
 
     // Полилиния маршрута
     private var routePolyline: PolylineMapObject? = null
@@ -367,6 +378,63 @@ internal class MapIncidentRenderer(
     }
 
     /**
+     * Отрисовывает маркер начальной или конечной точки маршрута.
+     */
+    fun drawRoutePointMarker(
+        latitude: Double,
+        longitude: Double,
+        type: RoutePointType,
+    ) {
+
+        // Удаляем предыдущий маркер этого типа
+        when (type) {
+            RoutePointType.START -> startPointMarker?.let { mapObjects.remove(it) }
+            RoutePointType.END -> endPointMarker?.let { mapObjects.remove(it) }
+        }
+
+        val marker = mapObjects.addPlacemark().apply {
+            geometry = Point(latitude, longitude)
+            setIcon(getRoutePointIcon(type))
+            setIconStyle(
+                IconStyle().apply {
+                    anchor = PointF(0.5f, 1.0f)
+                    scale = 1.0f
+                }
+            )
+            userData = "route_point_${type.name}"
+        }
+
+        when (type) {
+            RoutePointType.START -> startPointMarker = marker
+            RoutePointType.END -> endPointMarker = marker
+        }
+    }
+
+    /**
+     * Возвращает или создаёт ImageProvider для типа точки маршрута.
+     */
+    private fun getRoutePointIcon(type: RoutePointType): ImageProvider {
+        return routePointIconCache.getOrPut(type) {
+            val drawableResId = when (type) {
+                RoutePointType.START -> R.drawable.ic_route_start
+                RoutePointType.END -> R.drawable.ic_route_end
+            }
+            val bitmap = drawableToBitmap(drawableResId)
+            ImageProvider.fromBitmap(bitmap)
+        }
+    }
+
+    /**
+     * Очищает маркеры точек маршрута.
+     */
+    fun clearRoutePointMarkers() {
+        startPointMarker?.let { mapObjects.remove(it) }
+        endPointMarker?.let { mapObjects.remove(it) }
+        startPointMarker = null
+        endPointMarker = null
+    }
+
+    /**
      * Очищает только маркеры безопасности (по userData-тегу).
      */
     private fun clearSafetyMarkers() {
@@ -395,6 +463,7 @@ internal class MapIncidentRenderer(
         routePolyline?.let { mapObjects.remove(it) }
         routePolyline = null
         clearSafetyMarkers()
+        clearRoutePointMarkers()
     }
 
     fun clearListeners() {

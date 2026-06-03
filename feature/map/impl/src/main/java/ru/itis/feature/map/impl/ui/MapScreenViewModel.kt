@@ -129,6 +129,17 @@ internal class MapScreenViewModel @Inject constructor(
                     ?: return
                 Log.i("BUILD_ROUTE", "Start point event. Start point is " +
                         "${(_pageState.value as? MapScreenState.RouteMode)?.startPoint}")
+
+                //отрисовать иконку точки старта
+                viewModelScope.launch {
+                    _pageEffect.emit(
+                        MapScreenEffect.RoutePointMarkerAdded(
+                            latitude = event.latitude,
+                            longitude = event.longitude,
+                            isStart = true
+                        )
+                    )
+                }
             }
 
             is MapScreenEvent.OnRouteEndSelected -> {
@@ -142,6 +153,16 @@ internal class MapScreenViewModel @Inject constructor(
                     ?: return
                 Log.i("BUILD_ROUTE", "End point event. End point is " +
                         "${(_pageState.value as? MapScreenState.RouteMode)?.endPoint}")
+
+                viewModelScope.launch {
+                    _pageEffect.emit(
+                        MapScreenEffect.RoutePointMarkerAdded(
+                            latitude = event.latitude,
+                            longitude = event.longitude,
+                            isStart = false
+                        )
+                    )
+                }
             }
 
             is MapScreenEvent.OnBuildRouteClicked -> {
@@ -179,6 +200,16 @@ internal class MapScreenViewModel @Inject constructor(
 
                 _pageState.value = if (event.isStartPoint) current.copy(startPoint = newPoint)
                 else current.copy(endPoint = newPoint)
+
+                viewModelScope.launch {
+                    _pageEffect.emit(
+                        MapScreenEffect.RoutePointMarkerAdded(
+                            latitude = event.latitude,
+                            longitude = event.longitude,
+                            isStart = event.isStartPoint
+                        )
+                    )
+                }
 
                 val (start, end) = getCurrentRoutePoints()
                 if (start != null && end != null) buildRoute()

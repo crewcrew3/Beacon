@@ -32,5 +32,11 @@ object IconsCustom {
     fun routeIcon(): ImageVector = ImageVector.vectorResource(R.drawable.ic_route)
 
     @Composable
+    fun expandIcon(): ImageVector = ImageVector.vectorResource(R.drawable.ic_expand_more)
+
+    @Composable
+    fun collapseIcon(): ImageVector = ImageVector.vectorResource(R.drawable.ic_expand_less)
+
+    @Composable
     fun addPhotoIcon(): ImageVector = ImageVector.vectorResource(R.drawable.ic_add_photo)
 }

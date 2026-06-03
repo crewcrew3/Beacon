@@ -67,6 +67,7 @@ dependencies {
 
     //compose
     implementation(libs.bundles.compose.deps)
+    implementation(libs.androidx.compose.animation.core)
     implementation(platform(libs.androidx.compose.bom))
     debugImplementation(libs.androidx.compose.ui.tooling)
 }

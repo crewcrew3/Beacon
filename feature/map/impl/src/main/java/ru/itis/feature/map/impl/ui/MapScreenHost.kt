@@ -5,6 +5,8 @@ import android.view.View
 import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -58,6 +60,16 @@ internal fun MapScreenHost() {
 
     val isEditMode by viewModel.isEditMode.collectAsState()
     val isRouteMode by viewModel.isRouteMode.collectAsState()
+
+    // Состояние для сворачивания панели маршрута
+    var isRoutePanelCollapsed by remember { mutableStateOf(false) }
+
+    // Сбрасываем состояние сворачивания при выходе из режима маршрута
+    LaunchedEffect(isRouteMode) {
+        if (!isRouteMode) {
+            isRoutePanelCollapsed = false
+        }
+    }
 
     var showAddDialog by remember { mutableStateOf(false) }
     var addDialogCoords by remember { mutableStateOf(Pair(0.0, 0.0)) }
@@ -173,6 +185,18 @@ internal fun MapScreenHost() {
                         }
                     }
                 }
+
+                is MapScreenEffect.RoutePointMarkerAdded -> {
+                    fragmentManager.findFragmentById(containerId)?.let { frag ->
+                        if (frag is MapScreenFragment) {
+                            frag.drawRoutePointMarker(
+                                latitude = effect.latitude,
+                                longitude = effect.longitude,
+                                isStart = effect.isStart
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -210,32 +234,82 @@ internal fun MapScreenHost() {
         )
 
         if (isRouteMode) {
-            RouteSelectionPanel(
-                startPoint = (pageState as? MapScreenState.RouteMode)?.startPoint,
-                endPoint = (pageState as? MapScreenState.RouteMode)?.endPoint,
-                isLoading = (pageState as? MapScreenState.RouteMode)?.isLoading ?: false,
-                onBuildRouteClick = {
-                    viewModel.processEvent(MapScreenEvent.OnBuildRouteClicked)
-                },
-                onFinishRouteClick = {
-                    viewModel.processEvent(MapScreenEvent.OnFinishRouteClicked)
-                },
-                onSearchAddress = { query, isStartPoint ->
-                    //TODO()
-                    // ЗАГЛУШКА ДЛЯ ГЕОКОДИНГА
-                    // В реальном приложении здесь нужно вызвать SearchManager из Яндекс.Карт
-                    // для преобразования адреса в координаты.
-                    // Для демонстрации возвращаем фиксированные координаты (центр Москвы).
-                    viewModel.processEvent(
-                        MapScreenEvent.OnAddressGeocoded(
-                            latitude = 55.751225,
-                            longitude = 37.62954,
-                            address = query,
-                            isStartPoint = isStartPoint
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .animateContentSize(animationSpec = tween(300)),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Top
+            ) {
+                RouteSelectionPanel(
+                    startPoint = (pageState as? MapScreenState.RouteMode)?.startPoint,
+                    endPoint = (pageState as? MapScreenState.RouteMode)?.endPoint,
+                    isLoading = (pageState as? MapScreenState.RouteMode)?.isLoading ?: false,
+                    isCollapsed = isRoutePanelCollapsed,
+                    onToggleCollapse = { isRoutePanelCollapsed = !isRoutePanelCollapsed },
+                    onBuildRouteClick = {
+                        viewModel.processEvent(MapScreenEvent.OnBuildRouteClicked)
+                    },
+                    onFinishRouteClick = {
+                        viewModel.processEvent(MapScreenEvent.OnFinishRouteClicked)
+                    },
+                    onSearchAddress = { query, isStartPoint ->
+                        //TODO()
+                        // ЗАГЛУШКА ДЛЯ ГЕОКОДИНГА
+                        // В реальном приложении здесь нужно вызвать SearchManager из Яндекс.Карт
+                        // для преобразования адреса в координаты.
+                        // Для демонстрации возвращаем фиксированные координаты (центр Москвы).
+                        viewModel.processEvent(
+                            MapScreenEvent.OnAddressGeocoded(
+                                latitude = 55.751225,
+                                longitude = 37.62954,
+                                address = query,
+                                isStartPoint = isStartPoint
+                            )
                         )
-                    )
+                    }
+                )
+
+                // Кнопка сворачивания/разворачивания панели
+                Surface(
+                    onClick = { isRoutePanelCollapsed = !isRoutePanelCollapsed },
+                    shape = RoundedCornerShape(DimensionsCustom.roundedCornersSmall),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(0.3f),
+                    tonalElevation = 2.dp,
+                    modifier = Modifier
+                        .padding(top = if (isRoutePanelCollapsed) 32.dp else 4.dp)
+                        .animateContentSize(animationSpec = tween(200))
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (isRoutePanelCollapsed)
+                                IconsCustom.expandIcon()
+                            else
+                                IconsCustom.collapseIcon(),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.7f),
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = if (isRoutePanelCollapsed)
+                                stringResource(R.string.btn_expand_route_panel)
+                            else
+                                stringResource(R.string.btn_collapse_route_panel),
+                            style = StylesCustom.basicBodySubTextCenter.copy(
+                                fontSize = androidx.compose.ui.unit.TextUnit(
+                                    13f,
+                                    androidx.compose.ui.unit.TextUnitType.Sp
+                                )
+                            ),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.7f)
+                        )
+                    }
                 }
-            )
+            }
         }
 
 

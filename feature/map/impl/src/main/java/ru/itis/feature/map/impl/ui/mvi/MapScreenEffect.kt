@@ -25,4 +25,14 @@ internal sealed interface MapScreenEffect {
 
     /** Режим маршрута завершён — очистить карту */
     data object RouteFinished : MapScreenEffect
+
+    /**
+     * Добавить маркер начальной/конечной точки на карту.
+     * Отображается только если точка выбрана тапом.
+     */
+    data class RoutePointMarkerAdded(
+        val latitude: Double,
+        val longitude: Double,
+        val isStart: Boolean  // true = начальная, false = конечная
+    ) : MapScreenEffect
 }

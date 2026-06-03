@@ -87,6 +87,29 @@ class MapScreenFragment : Fragment(R.layout.fragment_map_screen) {
         }
     }
 
+    /** Метод для отрисовки маркера точки маршрута из Compose. */
+    fun drawRoutePointMarker(
+        latitude: Double,
+        longitude: Double,
+        isStart: Boolean,
+    ) {
+        if (::incidentRenderer.isInitialized) {
+            incidentRenderer.drawRoutePointMarker(
+                latitude = latitude,
+                longitude = longitude,
+                type = if (isStart) MapIncidentRenderer.RoutePointType.START
+                else MapIncidentRenderer.RoutePointType.END,
+            )
+        }
+    }
+
+    /** Метод для очистки маркеров точек маршрута. */
+    fun clearRoutePointMarkers() {
+        if (::incidentRenderer.isInitialized) {
+            incidentRenderer.clearRoutePointMarkers()
+        }
+    }
+
     /** Метод для очистки маршрута и объектов безопасности. */
     fun clearRouteAndSafetyOverlay() {
         if (::incidentRenderer.isInitialized) {
