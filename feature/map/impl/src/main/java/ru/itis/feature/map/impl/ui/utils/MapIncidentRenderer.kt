@@ -128,7 +128,7 @@ internal class MapIncidentRenderer(
                 IncidentType.POOR_LIGHTING -> {
                     if (status == IncidentStatus.VERIFIED) {
                         //R.drawable.ic_lighting_warning_verified
-                        R.drawable.ic_placeholder
+                        R.drawable.ic_warning
                     } else {
                         R.drawable.ic_lighting_warning
                     }
@@ -136,7 +136,7 @@ internal class MapIncidentRenderer(
                 IncidentType.HARASSMENT -> {
                     if (status == IncidentStatus.VERIFIED) {
                         //R.drawable.ic_harassment_verified
-                        R.drawable.ic_placeholder
+                        R.drawable.ic_warning
                     } else {
                         R.drawable.ic_harassment
                     }
@@ -144,7 +144,7 @@ internal class MapIncidentRenderer(
                 IncidentType.PICKPOCKETING -> {
                     if (status == IncidentStatus.VERIFIED) {
                         //R.drawable.ic_pickpocket_verified
-                        R.drawable.ic_placeholder
+                        R.drawable.ic_warning
                     } else {
                         R.drawable.ic_pickpocket
                     }
@@ -152,7 +152,7 @@ internal class MapIncidentRenderer(
                 IncidentType.ROBBERY -> {
                     if (status == IncidentStatus.VERIFIED) {
                         //R.drawable.ic_robbery_verified
-                        R.drawable.ic_placeholder
+                        R.drawable.ic_warning
                     } else {
                         R.drawable.ic_robbery
                     }
@@ -160,7 +160,7 @@ internal class MapIncidentRenderer(
                 IncidentType.SUSPICIOUS_PERSON -> {
                     if (status == IncidentStatus.VERIFIED) {
                         //R.drawable.ic_suspicious_verified
-                        R.drawable.ic_placeholder
+                        R.drawable.ic_warning
                     } else {
                         R.drawable.ic_suspicious
                     }
@@ -168,7 +168,7 @@ internal class MapIncidentRenderer(
                 IncidentType.BAD_ROAD -> {
                     if (status == IncidentStatus.VERIFIED) {
                         //R.drawable.ic_bad_road_verified
-                        R.drawable.ic_placeholder
+                        R.drawable.ic_warning
                     } else {
                         R.drawable.ic_bad_road
                     }
@@ -176,7 +176,7 @@ internal class MapIncidentRenderer(
                 IncidentType.OTHER -> {
                     if (status == IncidentStatus.VERIFIED) {
                         //R.drawable.ic_other_verified
-                        R.drawable.ic_placeholder
+                        R.drawable.ic_warning
                     } else {
                         R.drawable.ic_other
                     }
