@@ -13,10 +13,12 @@ import ru.itis.core.domain.model.mark.IncidentModel
 import ru.itis.core.domain.model.mark.IncidentStatus
 import ru.itis.core.domain.model.mark.IncidentType
 import ru.itis.core.domain.model.mark.VerificationActionType
+import ru.itis.core.domain.model.route.RouteRequestModel
 import ru.itis.core.ui.R
 import ru.itis.core.utils.ExceptionHandler
 import ru.itis.core.utils.OperationResult
 import ru.itis.feature.map.impl.domain.usecase.AddIncidentUseCase
+import ru.itis.feature.map.impl.domain.usecase.BuildSafeRouteUseCase
 import ru.itis.feature.map.impl.domain.usecase.GetVisibleIncidentsUseCase
 import ru.itis.feature.map.impl.domain.usecase.VerifyIncidentUseCase
 import ru.itis.feature.map.impl.ui.mvi.MapScreenEffect
@@ -31,6 +33,7 @@ internal class MapScreenViewModel @Inject constructor(
     private val addIncidentUseCase: AddIncidentUseCase,
     private val getVisibleIncidentsUseCase: GetVisibleIncidentsUseCase,
     private val verifyIncidentUseCase: VerifyIncidentUseCase,
+    private val buildSafeRouteUseCase: BuildSafeRouteUseCase,
     private val exceptionHandler: ExceptionHandler,
 ) : ViewModel() {
 
@@ -55,9 +58,15 @@ internal class MapScreenViewModel @Inject constructor(
     private val _selectedIncident = MutableStateFlow<IncidentModel?>(null)
     val selectedIncident = _selectedIncident.asStateFlow()
 
+    /** Флаг: активен ли режим построения маршрута */
+    private val _isRouteMode = MutableStateFlow(false)
+    val isRouteMode = _isRouteMode.asStateFlow()
+
     fun processEvent(event: MapScreenEvent) {
         when (event) {
-            is MapScreenEvent.OnProfileBottomBarClick -> bottomBarNavigator.toProfileScreen()
+            is MapScreenEvent.OnProfileBottomBarClick -> {
+                bottomBarNavigator.toProfileScreen()
+            }
             is MapScreenEvent.OnMapBoundsChanged -> {
                 Log.i("RENDER_INCIDENT_DEBUG", "Map bounds changed")
                 loadIncidentsInBounds(event.bounds)
@@ -102,6 +111,77 @@ internal class MapScreenViewModel @Inject constructor(
             }
             is MapScreenEvent.OnCloseIncidentDialog -> {
                 _selectedIncident.value = null
+            }
+            is MapScreenEvent.OnEnterRouteMode -> {
+                _isRouteMode.value = true
+                _pageState.value = MapScreenState.RouteMode()
+                Log.i("BUILD_ROUTE", "Route mode is ${_isRouteMode.value}. Changed state to ${_pageState.value}")
+            }
+
+            is MapScreenEvent.OnRouteStartSelected -> {
+                val newPoint = RouteRequestModel.PointData(
+                    latitude = event.latitude,
+                    longitude = event.longitude,
+                    address = event.address
+                )
+                _pageState.value = (_pageState.value as? MapScreenState.RouteMode)
+                    ?.copy(startPoint = newPoint)
+                    ?: return
+                Log.i("BUILD_ROUTE", "Start point event. Start point is " +
+                        "${(_pageState.value as? MapScreenState.RouteMode)?.startPoint}")
+            }
+
+            is MapScreenEvent.OnRouteEndSelected -> {
+                val newPoint = RouteRequestModel.PointData(
+                    latitude = event.latitude,
+                    longitude = event.longitude,
+                    address = event.address
+                )
+                _pageState.value = (_pageState.value as? MapScreenState.RouteMode)
+                    ?.copy(endPoint = newPoint)
+                    ?: return
+                Log.i("BUILD_ROUTE", "End point event. End point is " +
+                        "${(_pageState.value as? MapScreenState.RouteMode)?.endPoint}")
+            }
+
+            is MapScreenEvent.OnBuildRouteClicked -> {
+                Log.i("BUILD_ROUTE", "On BuildRouteClicked event")
+                val (start, end) = getCurrentRoutePoints()
+                if (start != null && end != null) {
+                    Log.i("BUILD_ROUTE", "Start ($start) and end ($end) points -> building route...")
+                    buildRoute()
+                } else {
+                    viewModelScope.launch {
+                        _pageEffect.emit(
+                            MapScreenEffect.Message(R.string.route_error_points_not_selected)
+                        )
+                    }
+                }
+            }
+
+            is MapScreenEvent.OnFinishRouteClicked -> {
+                _isRouteMode.value = false
+                _pageState.value = MapScreenState.RouteMode()
+                viewModelScope.launch {
+                    _pageEffect.emit(MapScreenEffect.RouteFinished)
+                    // Возвращаемся к загрузке инцидентов
+                    loadIncidentsInBounds(doubleArrayOf(55.5, 56.0, 37.3, 38.0)) // дефолтные границы
+                }
+            }
+
+            is MapScreenEvent.OnAddressGeocoded -> {
+                val newPoint = RouteRequestModel.PointData(
+                    latitude = event.latitude,
+                    longitude = event.longitude,
+                    address = event.address
+                )
+                val current = (_pageState.value as? MapScreenState.RouteMode) ?: return
+
+                _pageState.value = if (event.isStartPoint) current.copy(startPoint = newPoint)
+                else current.copy(endPoint = newPoint)
+
+                val (start, end) = getCurrentRoutePoints()
+                if (start != null && end != null) buildRoute()
             }
         }
     }
@@ -204,5 +284,56 @@ internal class MapScreenViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    /**
+     * Основной метод построения безопасного маршрута.
+     * Вызывается когда выбраны обе точки.
+     */
+    private fun buildRoute() {
+        val (start, end) = getCurrentRoutePoints()
+        if (start == null || end == null) return
+
+        viewModelScope.launch {
+            _pageState.value = MapScreenState.RouteMode(isLoading = true)
+
+            val request = RouteRequestModel(startPoint = start, endPoint = end)
+
+            when (val result = buildSafeRouteUseCase(request)) {
+                is OperationResult.Success -> {
+                    // Успех: обновляем состояние и отправляем эффект для отрисовки
+                    _pageState.value = MapScreenState.RouteMode(
+                        startPoint = start,
+                        endPoint = end,
+                        routeResult = result.data,
+                        isLoading = false
+                    )
+                    _pageEffect.emit(MapScreenEffect.RouteBuilt(result.data))
+                    _pageEffect.emit(
+                        MapScreenEffect.Message(R.string.toast_msg_route_built)
+                    )
+                }
+                is OperationResult.Error -> {
+                    // Ошибка
+                    _pageState.value = MapScreenState.RouteMode(
+                        startPoint = start,
+                        endPoint = end,
+                        isLoading = false,
+                        error = exceptionHandler.getErrorMessage(result.errorType).toString()
+                    )
+                    val messageResId = exceptionHandler.getErrorMessage(result.errorType)
+                    _pageEffect.emit(MapScreenEffect.Message(messageResId))
+                }
+            }
+        }
+    }
+
+    /**
+     * Вспомогательный метод: получает текущие точки из состояния.
+     * Возвращает null, если приложение не в режиме маршрута.
+     */
+    private fun getCurrentRoutePoints(): Pair<RouteRequestModel.PointData?, RouteRequestModel.PointData?> {
+        val state = _pageState.value as? MapScreenState.RouteMode ?: return null to null
+        return state.startPoint to state.endPoint
     }
 }

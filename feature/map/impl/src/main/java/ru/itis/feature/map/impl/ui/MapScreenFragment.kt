@@ -20,6 +20,7 @@ import kotlinx.coroutines.launch
 import ru.itis.core.domain.model.mark.IncidentModel
 import ru.itis.core.domain.model.mark.IncidentStatus
 import ru.itis.core.domain.model.mark.IncidentType
+import ru.itis.core.domain.model.route.RouteSafetyOverlay
 import ru.itis.feature.map.impl.R
 import ru.itis.feature.map.impl.databinding.FragmentMapScreenBinding
 import ru.itis.feature.map.impl.ui.mvi.MapScreenEffect
@@ -69,6 +70,27 @@ class MapScreenFragment : Fragment(R.layout.fragment_map_screen) {
     fun updateIncidentStatus(incidentId: Long, incidentType: IncidentType, newStatus: IncidentStatus) {
         if (::incidentRenderer.isInitialized) {
             incidentRenderer.updateIncidentStatus(incidentId, incidentType, newStatus)
+        }
+    }
+
+    /** Метод для отрисовки безопасного маршрута из Compose. */
+    fun drawSafeRoute(polyline: List<Point>, riskScore: Float) {
+        if (::incidentRenderer.isInitialized) {
+            incidentRenderer.drawSafeRoute(polyline, riskScore)
+        }
+    }
+
+    /** Метод для отрисовки объектов безопасности вдоль маршрута. */
+    fun drawSafetyOverlay(overlay: RouteSafetyOverlay) {
+        if (::incidentRenderer.isInitialized) {
+            incidentRenderer.drawSafetyOverlay(overlay)
+        }
+    }
+
+    /** Метод для очистки маршрута и объектов безопасности. */
+    fun clearRouteAndSafetyOverlay() {
+        if (::incidentRenderer.isInitialized) {
+            incidentRenderer.clearRouteAndSafetyOverlay()
         }
     }
 
@@ -182,6 +204,7 @@ class MapScreenFragment : Fragment(R.layout.fragment_map_screen) {
         // Очищаем кэш слушателей в рендерере
         if (::incidentRenderer.isInitialized) {
             incidentRenderer.clearListeners()
+            incidentRenderer.clearRouteAndSafetyOverlay()
         }
         mapView.mapWindow.map.removeCameraListener(mapCameraListener)
     }

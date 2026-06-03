@@ -105,6 +105,7 @@ fun InputFieldCustom(
                     }
                 }
             },
+            enabled = inputFieldSettings.enabled,
             modifier = inputFieldSettings.modifier
                 .fillMaxWidth()
         )

@@ -50,4 +50,35 @@ internal sealed interface MapScreenEvent {
 
     /** Закрытие диалога с деталями инцидента */
     data object OnCloseIncidentDialog : MapScreenEvent
+
+    /** Пользователь выбрал начальную точку маршрута (тап или адрес) */
+    data class OnRouteStartSelected(
+        val latitude: Double,
+        val longitude: Double,
+        val address: String? = null
+    ) : MapScreenEvent
+
+    /** Пользователь выбрал конечную точку маршрута (тап или адрес) */
+    data class OnRouteEndSelected(
+        val latitude: Double,
+        val longitude: Double,
+        val address: String? = null
+    ) : MapScreenEvent
+
+    /** Переключение в режим построения маршрута */
+    data object OnEnterRouteMode : MapScreenEvent
+
+    /** Запрос на построение безопасного маршрута */
+    data object OnBuildRouteClicked : MapScreenEvent
+
+    /** Завершение режима маршрута (очистка) */
+    data object OnFinishRouteClicked : MapScreenEvent
+
+    /** Результат геокодинга адреса */
+    data class OnAddressGeocoded(
+        val latitude: Double,
+        val longitude: Double,
+        val address: String,
+        val isStartPoint: Boolean
+    ) : MapScreenEvent
 }

@@ -29,6 +29,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import ru.itis.core.domain.model.mark.IncidentModel
 import ru.itis.core.ui.BaseScreen
 import ru.itis.core.ui.R
+import ru.itis.feature.map.impl.ui.components.RouteSelectionPanel
 import ru.itis.core.ui.component.settings.BottomBarSettings
 import ru.itis.core.ui.theme.BeaconTheme
 import ru.itis.core.ui.theme.DimensionsCustom
@@ -56,15 +57,37 @@ internal fun MapScreenHost() {
     }
 
     val isEditMode by viewModel.isEditMode.collectAsState()
+    val isRouteMode by viewModel.isRouteMode.collectAsState()
 
     var showAddDialog by remember { mutableStateOf(false) }
     var addDialogCoords by remember { mutableStateOf(Pair(0.0, 0.0)) }
 
     // Создаём делегат, который фрагмент будет использовать для отправки событий
-    val fragmentDelegate = remember(viewModel) {
+    // Важно: используем remember с ключами isEditMode и isRouteMode, чтобы делегат пересоздавался при смене режима
+    val fragmentDelegate = remember(viewModel, isEditMode, isRouteMode) {
         object : MapScreenDelegate {
             override fun onMapTapped(latitude: Double, longitude: Double) {
-                viewModel.processEvent(MapScreenEvent.OnMapTapped(latitude, longitude))
+                when {
+                    isEditMode -> {
+                        viewModel.processEvent(MapScreenEvent.OnMapTapped(latitude, longitude))
+                    }
+                    isRouteMode -> {
+                        // В режиме маршрута тап выбирает точку (сначала start, потом end)
+                        // Точки выбираются только если они ещё не заданы
+                        val currentState = viewModel.pageState.value as? MapScreenState.RouteMode
+                        if (currentState?.startPoint == null) {
+                            Log.i("BUILD_ROUTE", "Start point tap (fragment delegate)")
+                            viewModel.processEvent(
+                                MapScreenEvent.OnRouteStartSelected(latitude, longitude)
+                            )
+                        } else if (currentState.endPoint == null) {
+                            Log.i("BUILD_ROUTE", "End point tap (fragment delegate)")
+                            viewModel.processEvent(
+                                MapScreenEvent.OnRouteEndSelected(latitude, longitude)
+                            )
+                        }
+                    }
+                }
             }
             override fun onIncidentClicked(incident: IncidentModel) {
                 viewModel.processEvent(MapScreenEvent.OnIncidentClicked(incident))
@@ -76,11 +99,13 @@ internal fun MapScreenHost() {
                 minLng: Double,
                 maxLng: Double
             ) {
-                viewModel.processEvent(
-                    MapScreenEvent.OnMapBoundsChanged(
-                        bounds = doubleArrayOf(minLat, maxLat, minLng, maxLng)
+                if (!isRouteMode) {
+                    viewModel.processEvent(
+                        MapScreenEvent.OnMapBoundsChanged(
+                            bounds = doubleArrayOf(minLat, maxLat, minLng, maxLng)
+                        )
                     )
-                )
+                }
             }
         }
     }
@@ -123,6 +148,31 @@ internal fun MapScreenHost() {
                         }
                     }
                 }
+                is MapScreenEffect.RouteBuilt -> {
+                    // Рисуем маршрут и оверлей на карте
+                    fragmentManager.findFragmentById(containerId)?.let { frag ->
+                        if (frag is MapScreenFragment) {
+                            // Рисуем линию маршрута с цветом по riskScore
+                            frag.drawSafeRoute(
+                                polyline = effect.result.route.polyline,
+                                riskScore = effect.result.route.riskScore
+                            )
+                            // Рисуем иконки безопасности вдоль маршрута (если есть)
+                            effect.result.safetyOverlay?.let { overlay ->
+                                frag.drawSafetyOverlay(overlay)
+                            }
+                        }
+                    }
+                }
+
+                is MapScreenEffect.RouteFinished -> {
+                    // Очищаем маршрут и оверлей, возвращаем карту в исходное состояние
+                    fragmentManager.findFragmentById(containerId)?.let { frag ->
+                        if (frag is MapScreenFragment) {
+                            frag.clearRouteAndSafetyOverlay()
+                        }
+                    }
+                }
             }
         }
     }
@@ -130,7 +180,7 @@ internal fun MapScreenHost() {
     // Подписка на состояние для первоначальной отрисовки
     LaunchedEffect(pageState) {
         Log.i("RENDER_INCIDENT_DEBUG", "Compose: pageState changed to: ${pageState::class.simpleName}")
-        if (pageState is MapScreenState.IncidentsLoaded) {
+        if (pageState is MapScreenState.IncidentsLoaded && !isRouteMode) {
             Log.i("RENDER_INCIDENT_DEBUG", "Compose: Calling frag.renderIncidents with ${(pageState as MapScreenState.IncidentsLoaded).incidents.size} items")
             fragmentManager.findFragmentById(containerId)?.let { frag ->
                 if (frag is MapScreenFragment) {
@@ -159,53 +209,122 @@ internal fun MapScreenHost() {
             },
         )
 
-        // Кнопка переключения режима редактирования (в правом верхнем углу)
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            contentAlignment = Alignment.TopEnd
-        ) {
-            Surface(
-                onClick = { viewModel.processEvent(MapScreenEvent.OnToggleEditMode) },
-                shape = RoundedCornerShape(DimensionsCustom.roundedCornersMid),
-                color = if (isEditMode)
-                    MaterialTheme.colorScheme.primary
-                else
-                    MaterialTheme.colorScheme.surfaceVariant,
-                tonalElevation = 4.dp
+        if (isRouteMode) {
+            RouteSelectionPanel(
+                startPoint = (pageState as? MapScreenState.RouteMode)?.startPoint,
+                endPoint = (pageState as? MapScreenState.RouteMode)?.endPoint,
+                isLoading = (pageState as? MapScreenState.RouteMode)?.isLoading ?: false,
+                onBuildRouteClick = {
+                    viewModel.processEvent(MapScreenEvent.OnBuildRouteClicked)
+                },
+                onFinishRouteClick = {
+                    viewModel.processEvent(MapScreenEvent.OnFinishRouteClicked)
+                },
+                onSearchAddress = { query, isStartPoint ->
+                    //TODO()
+                    // ЗАГЛУШКА ДЛЯ ГЕОКОДИНГА
+                    // В реальном приложении здесь нужно вызвать SearchManager из Яндекс.Карт
+                    // для преобразования адреса в координаты.
+                    // Для демонстрации возвращаем фиксированные координаты (центр Москвы).
+                    viewModel.processEvent(
+                        MapScreenEvent.OnAddressGeocoded(
+                            latitude = 55.751225,
+                            longitude = 37.62954,
+                            address = query,
+                            isStartPoint = isStartPoint
+                        )
+                    )
+                }
+            )
+        }
+
+
+
+        if (!isRouteMode) {
+            // Кнопка переключения режима редактирования (в правом верхнем углу)
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                contentAlignment = Alignment.TopEnd
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                Surface(
+                    onClick = { viewModel.processEvent(MapScreenEvent.OnToggleEditMode) },
+                    shape = RoundedCornerShape(DimensionsCustom.roundedCornersMid),
+                    color = if (isEditMode)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.surfaceVariant,
+                    tonalElevation = 4.dp
                 ) {
-                    Icon(
-                        imageVector = if (isEditMode) IconsCustom.editIcon() else IconsCustom.visibilityIcon(),
-                        contentDescription = null,
-                        tint = if (isEditMode)
-                            MaterialTheme.colorScheme.onPrimary
-                        else
-                            MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = if (isEditMode)
-                            stringResource(R.string.map_screen_edit_mode_on)
-                        else
-                            stringResource(R.string.map_screen_edit_mode_off),
-                        style = StylesCustom.basicBodyTextCenter,
-                        color = if (isEditMode)
-                            MaterialTheme.colorScheme.onPrimary
-                        else
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (isEditMode) IconsCustom.editIcon() else IconsCustom.visibilityIcon(),
+                            contentDescription = null,
+                            tint = if (isEditMode)
+                                MaterialTheme.colorScheme.onPrimary
+                            else
+                                MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = if (isEditMode)
+                                stringResource(R.string.map_screen_edit_mode_on)
+                            else
+                                stringResource(R.string.map_screen_edit_mode_off),
+                            style = StylesCustom.basicBodyTextCenter,
+                            color = if (isEditMode)
+                                MaterialTheme.colorScheme.onPrimary
+                            else
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        }
+
+        // Кнопка входа в режим построения маршрута (показывается только когда НЕ в режиме маршрута и НЕ в режиме редактирования)
+        if (!isRouteMode && !isEditMode) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                contentAlignment = Alignment.BottomCenter
+            ) {
+                Surface(
+                    onClick = { viewModel.processEvent(MapScreenEvent.OnEnterRouteMode) },
+                    shape = RoundedCornerShape(DimensionsCustom.roundedCornersMid),
+                    color = MaterialTheme.colorScheme.tertiary,
+                    tonalElevation = 4.dp,
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
+                    ) {
+                        Icon(
+                            imageVector = IconsCustom.routeIcon(),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onTertiary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = stringResource(R.string.btn_enter_route_mode),
+                            style = StylesCustom.basicBodyTextCenter,
+                            color = MaterialTheme.colorScheme.onTertiary
+                        )
+                    }
                 }
             }
         }
 
         // Диалог добавления инцидента
-        if (showAddDialog) {
+        if (showAddDialog && isEditMode) {
             AddIncidentDialog(
                 onDismissRequest = { showAddDialog = false },
                 onConfirm = { type, description ->

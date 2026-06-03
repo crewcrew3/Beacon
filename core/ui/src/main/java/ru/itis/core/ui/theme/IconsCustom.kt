@@ -29,5 +29,8 @@ object IconsCustom {
     fun editIcon(): ImageVector = ImageVector.vectorResource(R.drawable.ic_pencil)
 
     @Composable
+    fun routeIcon(): ImageVector = ImageVector.vectorResource(R.drawable.ic_route)
+
+    @Composable
     fun addPhotoIcon(): ImageVector = ImageVector.vectorResource(R.drawable.ic_add_photo)
 }

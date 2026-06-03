@@ -2,8 +2,10 @@ package ru.itis.feature.map.impl.ui.utils
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.PointF
 import android.util.Log
+import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.ContextCompat
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.map.CircleMapObject
@@ -20,7 +22,11 @@ import ru.itis.core.domain.model.mark.IncidentStatus
 import ru.itis.core.domain.model.mark.IncidentType
 import ru.itis.core.ui.R
 import androidx.core.graphics.createBitmap
+import com.yandex.mapkit.geometry.Polyline
+import com.yandex.mapkit.map.LineStyle
 import com.yandex.mapkit.map.MapObjectTapListener
+import ru.itis.core.domain.model.route.RouteSafetyOverlay
+import ru.itis.core.ui.theme.ColorsCustom
 
 /**
  * Метод для отрисовки коллекции инцидентов на карте.
@@ -32,6 +38,21 @@ internal class MapIncidentRenderer(
     private val mapObjects: MapObjectCollection,
     private val onIncidentClicked: (IncidentModel) -> Unit
 ) {
+
+    // Полилиния маршрута
+    private var routePolyline: PolylineMapObject? = null
+
+    // Маркеры безопасности (для очистки)
+    private val safetyMarkerIds = mutableSetOf<String>()
+
+    // Кэш иконок для объектов безопасности
+    private val safetyIconCache = mutableMapOf<SafetyOverlayType, ImageProvider>()
+
+    private enum class SafetyOverlayType {
+        SAFETY_PLACE,   // островок безопасности
+        SAFETY_CAMERA,  // камера
+        LIGHTING_POLE   // опора освещения
+    }
 
     // Кэш ImageProvider для каждого типа инцидента
     private val iconCache = mutableMapOf<String, ImageProvider>()
@@ -234,6 +255,146 @@ internal class MapIncidentRenderer(
 
             placemark.addTapListener(tapListener)
         }
+    }
+
+    /**
+     * Отрисовывает безопасный маршрут на карте.
+     * @param polyline список координат маршрута
+     * @param riskScore оценка риска (0.0-1.0) для цвета линии
+     */
+    fun drawSafeRoute(polyline: List<Point>, riskScore: Float) {
+        // Удаляем предыдущий маршрут если есть
+        routePolyline?.let { mapObjects.remove(it) }
+
+        if (polyline.size < 2) return
+
+        // Цвет линии зависит от риска: зелёный (безопасно) -> жёлтый -> красный (опасно)
+        val routeColor = when {
+            riskScore < 0.3f -> ColorsCustom.SafeRouteSafe
+            riskScore < 0.6f -> ColorsCustom.SafeRouteMid
+            else -> ColorsCustom.SafeRouteDanger
+        }
+
+        routePolyline = mapObjects.addPolyline().apply {
+            geometry = Polyline(polyline)
+            setStrokeColor(routeColor.copy(alpha = 0.7f).toArgb())
+            style = LineStyle().apply {
+                strokeWidth = 8f
+                outlineColor = routeColor.toArgb()
+            }
+        }
+    }
+
+    /**
+     * Отрисовывает объекты безопасности вдоль маршрута.
+     */
+    fun drawSafetyOverlay(overlay: RouteSafetyOverlay) {
+        // Очищаем предыдущие маркеры безопасности
+        clearSafetyMarkers()
+
+        // Рисуем островки безопасности
+        overlay.safetyPlaces.forEach { place ->
+            val markerId = "safety_place_${place.id}"
+            addSafetyMarker(
+                latitude = place.latitude,
+                longitude = place.longitude,
+                type = SafetyOverlayType.SAFETY_PLACE,
+                userData = markerId
+            )
+            safetyMarkerIds.add(markerId)
+        }
+
+        // Рисуем камеры
+        overlay.safetyCameras.forEach { camera ->
+            val markerId = "safety_camera_${camera.globalId}"
+            addSafetyMarker(
+                latitude = camera.latitude,
+                longitude = camera.longitude,
+                type = SafetyOverlayType.SAFETY_CAMERA,
+                userData = markerId
+            )
+            safetyMarkerIds.add(markerId)
+        }
+
+        // Рисуем опоры освещения
+        overlay.lightingPoles.forEach { pole ->
+            val markerId = "lighting_pole_${pole.globalId}"
+            addSafetyMarker(
+                latitude = pole.latitude,
+                longitude = pole.longitude,
+                type = SafetyOverlayType.LIGHTING_POLE,
+                userData = markerId
+            )
+            safetyMarkerIds.add(markerId)
+        }
+    }
+
+    /**
+     * Вспомогательный метод для добавления маркера безопасности.
+     */
+    private fun addSafetyMarker(
+        latitude: Double,
+        longitude: Double,
+        type: SafetyOverlayType,
+        userData: String
+    ) {
+        val placemark = mapObjects.addPlacemark().apply {
+            geometry = Point(latitude, longitude)
+            setIcon(getSafetyIcon(type))
+            setIconStyle(
+                IconStyle().apply {
+                    anchor = PointF(0.5f, 1.0f)
+                    scale = 0.8f
+                }
+            )
+            this.userData = userData
+        }
+    }
+
+    /**
+     * Возвращает или создаёт ImageProvider для типа объекта безопасности.
+     */
+    private fun getSafetyIcon(type: SafetyOverlayType): ImageProvider {
+        return safetyIconCache.getOrPut(type) {
+            val drawableResId = when (type) {
+                SafetyOverlayType.SAFETY_PLACE -> R.drawable.ic_safety_place
+                SafetyOverlayType.SAFETY_CAMERA -> R.drawable.ic_safety_camera
+                SafetyOverlayType.LIGHTING_POLE -> R.drawable.ic_lighting_pole
+            }
+            val bitmap = drawableToBitmap(drawableResId)
+            ImageProvider.fromBitmap(bitmap)
+        }
+    }
+
+    /**
+     * Очищает только маркеры безопасности (по userData-тегу).
+     */
+    private fun clearSafetyMarkers() {
+        mapObjects.traverse(object : MapObjectVisitor {
+            override fun onPlacemarkVisited(placemark: PlacemarkMapObject) {
+                val userData = placemark.userData as? String
+                if (userData != null && safetyMarkerIds.contains(userData)) {
+                    mapObjects.remove(placemark)
+                }
+            }
+            override fun onPolylineVisited(polyline: PolylineMapObject) {}
+            override fun onPolygonVisited(polygon: PolygonMapObject) {}
+            override fun onCircleVisited(circle: CircleMapObject) {}
+            override fun onCollectionVisitStart(collection: MapObjectCollection): Boolean = true
+            override fun onCollectionVisitEnd(collection: MapObjectCollection) {}
+            override fun onClusterizedCollectionVisitStart(collection: ClusterizedPlacemarkCollection): Boolean = true
+            override fun onClusterizedCollectionVisitEnd(collection: ClusterizedPlacemarkCollection) {}
+        })
+        safetyMarkerIds.clear()
+    }
+
+    /**
+     * Очищает маршрут и все объекты безопасности.
+     */
+    fun clearRouteAndSafetyOverlay() {
+        routePolyline?.let { mapObjects.remove(it) }
+        routePolyline = null
+        clearSafetyMarkers()
     }
 
     fun clearListeners() {

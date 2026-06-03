@@ -18,5 +18,6 @@ data class InputFieldSettings(
     val onValueChange: (String) -> Unit = {},
     val isNumberKeyboard: Boolean = false,
     val isPasswordField: Boolean = false,
+    val enabled: Boolean = true,
     val modifier: Modifier = Modifier
 )

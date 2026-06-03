@@ -33,4 +33,8 @@ object ColorsCustom {
     val IncidentPendingVerification = Color(0xFF828282)
     val OnIncidentVerified = Color(0xFFFFE8DF)
     val OnIncidentPendingVerification = Color(0xFF3D3D3D)
+
+    val SafeRouteSafe = Color(0xFF4CAF50)
+    val SafeRouteMid = Color(0xFFFFC107)
+    val SafeRouteDanger = Color(0xFFF44336)
 }

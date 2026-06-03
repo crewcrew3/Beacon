@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import ru.itis.core.domain.model.mark.IncidentModel
 import ru.itis.core.domain.model.mark.IncidentStatus
 import ru.itis.core.domain.model.mark.IncidentType
+import ru.itis.core.domain.model.route.SafeRouteResult
 
 internal sealed interface MapScreenEffect {
 
@@ -18,4 +19,10 @@ internal sealed interface MapScreenEffect {
 
     /** Обновить статус существующей метки */
     data class IncidentStatusUpdated(val incidentId: Long, val incidentType: IncidentType, val newStatus: IncidentStatus) : MapScreenEffect
+
+    /** Маршрут успешно построен */
+    data class RouteBuilt(val result: SafeRouteResult) : MapScreenEffect
+
+    /** Режим маршрута завершён — очистить карту */
+    data object RouteFinished : MapScreenEffect
 }
