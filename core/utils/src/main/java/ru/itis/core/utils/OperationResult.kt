@@ -23,4 +23,7 @@ enum class BusinessErrorCode {
     // Incident errors
     INCIDENT_NOT_FOUND,
     INVALID_BOUNDS,
+
+    //Map
+    ADDRESS_NOT_FOUND,
 }

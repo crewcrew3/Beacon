@@ -3,7 +3,9 @@ package ru.itis.feature.map.impl.ui
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.yandex.mapkit.geometry.BoundingBox
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -24,6 +26,7 @@ import ru.itis.feature.map.impl.domain.usecase.VerifyIncidentUseCase
 import ru.itis.feature.map.impl.ui.mvi.MapScreenEffect
 import ru.itis.feature.map.impl.ui.mvi.MapScreenEvent
 import ru.itis.feature.map.impl.ui.mvi.MapScreenState
+import ru.itis.feature.map.impl.ui.utils.MapKitGeocoder
 import ru.itis.navigation.api.BottomBarNavigator
 import javax.inject.Inject
 
@@ -140,6 +143,7 @@ internal class MapScreenViewModel @Inject constructor(
                         )
                     )
                 }
+                tryAutoBuildRoute()
             }
 
             is MapScreenEvent.OnRouteEndSelected -> {
@@ -163,6 +167,7 @@ internal class MapScreenViewModel @Inject constructor(
                         )
                     )
                 }
+                tryAutoBuildRoute()
             }
 
             is MapScreenEvent.OnBuildRouteClicked -> {
@@ -190,29 +195,12 @@ internal class MapScreenViewModel @Inject constructor(
                 }
             }
 
-            is MapScreenEvent.OnAddressGeocoded -> {
-                val newPoint = RouteRequestModel.PointData(
-                    latitude = event.latitude,
-                    longitude = event.longitude,
-                    address = event.address
+            is MapScreenEvent.OnSearchAddressRequested -> {
+                Log.i("GEOCODER", "Geocoding requested: '${event.query}', isStart=${event.isStartPoint}")
+                geocodeAddress(
+                    address = event.query,
+                    isStartPoint = event.isStartPoint
                 )
-                val current = (_pageState.value as? MapScreenState.RouteMode) ?: return
-
-                _pageState.value = if (event.isStartPoint) current.copy(startPoint = newPoint)
-                else current.copy(endPoint = newPoint)
-
-                viewModelScope.launch {
-                    _pageEffect.emit(
-                        MapScreenEffect.RoutePointMarkerAdded(
-                            latitude = event.latitude,
-                            longitude = event.longitude,
-                            isStart = event.isStartPoint
-                        )
-                    )
-                }
-
-                val (start, end) = getCurrentRoutePoints()
-                if (start != null && end != null) buildRoute()
             }
         }
     }
@@ -356,6 +344,56 @@ internal class MapScreenViewModel @Inject constructor(
                     _pageEffect.emit(MapScreenEffect.Message(messageResId))
                 }
             }
+        }
+    }
+
+    /**
+     * Запускает геокодинг адреса.
+     * ВАЖНО: должен вызываться из Main-потока, т.к. внутри использует MapKit API.
+     *
+     * @param address текст адреса
+     * @param isStartPoint true = начальная точка, false = конечная
+     * @param searchBounds ограничивающая область для поиска (опционально)
+     */
+    fun geocodeAddress(
+        address: String,
+        isStartPoint: Boolean,
+        searchBounds: BoundingBox? = null
+    ) {
+        viewModelScope.launch(Dispatchers.Main) {
+            val geocoder = MapKitGeocoder()
+
+            when (val result = geocoder.geocode(address, searchBounds)) {
+                is OperationResult.Success -> {
+                    _pageEffect.emit(
+                        MapScreenEffect.OnAddressGeocoded(
+                            latitude = result.data.latitude,
+                            longitude = result.data.longitude,
+                            address = address,
+                            isStartPoint = isStartPoint
+                        )
+                    )
+                }
+                is OperationResult.Error -> {
+                    val messageResId = exceptionHandler.getErrorMessage(result.errorType)
+                    _pageEffect.emit(MapScreenEffect.Message(messageResId))
+                }
+            }
+        }
+    }
+
+    private fun tryAutoBuildRoute() {
+        val state = _pageState.value as? MapScreenState.RouteMode ?: return
+        // Строим только если:
+        // 1) Обе точки есть
+        // 2) Не в процессе загрузки (чтобы не дублировать запросы)
+        // 3) Ещё нет результата маршрута (чтобы не перестраивать без нужды)
+        if (state.startPoint != null &&
+            state.endPoint != null &&
+            !state.isLoading &&
+            state.routeResult == null) {
+            Log.i("BUILD_ROUTE", "Auto-building route: both points ready")
+            buildRoute()
         }
     }
 

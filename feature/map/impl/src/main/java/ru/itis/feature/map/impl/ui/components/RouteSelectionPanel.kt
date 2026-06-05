@@ -93,18 +93,24 @@ internal fun RouteSelectionPanel(
                 ) {
                     Button(
                         onClick = {
-                            if (startAddressInput.isNotBlank()) {
-                                onSearchAddress(startAddressInput, true)
-                            }
-                            if (endAddressInput.isNotBlank()) {
-                                onSearchAddress(endAddressInput, false)
-                            }
+                            // Если точки уже есть - сразу строим маршрут
                             if (startPoint != null && endPoint != null) {
                                 onBuildRouteClick()
                             }
+                            // Если точек нет, но адреса введены - запускаем геокодинг
+                            else {
+                                if (startAddressInput.isNotBlank()) {
+                                    onSearchAddress(startAddressInput, true)
+                                }
+                                if (endAddressInput.isNotBlank()) {
+                                    onSearchAddress(endAddressInput, false)
+                                }
+                                // НЕ вызываем onBuildRouteClick() здесь - он сработает автоматически, когда придут координаты
+                            }
                         },
                         modifier = Modifier.weight(1f),
-                        enabled = startPoint != null && endPoint != null && !isLoading,
+                        enabled = (startPoint != null && endPoint != null) ||
+                                (startAddressInput.isNotBlank() && endAddressInput.isNotBlank()) && !isLoading,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.tertiary,
                             contentColor = MaterialTheme.colorScheme.onTertiary,

@@ -35,4 +35,12 @@ internal sealed interface MapScreenEffect {
         val longitude: Double,
         val isStart: Boolean  // true = начальная, false = конечная
     ) : MapScreenEffect
+
+    /** Результат геокодинга адреса */
+    data class OnAddressGeocoded(
+        val latitude: Double,
+        val longitude: Double,
+        val address: String,
+        val isStartPoint: Boolean
+    ) : MapScreenEffect
 }

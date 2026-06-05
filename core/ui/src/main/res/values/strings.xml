@@ -13,6 +13,7 @@
     <string name="exception_msg_user_already_exists">Пользователь с таким номером телефона уже существует</string>
     <string name="exception_msg_user_not_found">Такой пользователь не найден</string>
     <string name="exception_msg_get_data">Ошибка получения данных</string>
+    <string name="exception_msg_get_address">Адрес не найден</string>
     <string name="exception_msg_log_out">Ошибка выхода из системы</string>
     <string name="exception_msg_incident_not_found">Такого инцидента не существует</string>
 

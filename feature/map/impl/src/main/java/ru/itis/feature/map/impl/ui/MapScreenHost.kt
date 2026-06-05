@@ -197,6 +197,24 @@ internal fun MapScreenHost() {
                         }
                     }
                 }
+
+                is MapScreenEffect.OnAddressGeocoded -> {
+                    viewModel.processEvent(
+                        if (effect.isStartPoint) {
+                            MapScreenEvent.OnRouteStartSelected(
+                                latitude = effect.latitude,
+                                longitude = effect.longitude,
+                                address = effect.address
+                            )
+                        } else {
+                            MapScreenEvent.OnRouteEndSelected(
+                                latitude = effect.latitude,
+                                longitude = effect.longitude,
+                                address = effect.address
+                            )
+                        }
+                    )
+                }
             }
         }
     }
@@ -254,16 +272,9 @@ internal fun MapScreenHost() {
                         viewModel.processEvent(MapScreenEvent.OnFinishRouteClicked)
                     },
                     onSearchAddress = { query, isStartPoint ->
-                        //TODO()
-                        // ЗАГЛУШКА ДЛЯ ГЕОКОДИНГА
-                        // В реальном приложении здесь нужно вызвать SearchManager из Яндекс.Карт
-                        // для преобразования адреса в координаты.
-                        // Для демонстрации возвращаем фиксированные координаты (центр Москвы).
                         viewModel.processEvent(
-                            MapScreenEvent.OnAddressGeocoded(
-                                latitude = 55.751225,
-                                longitude = 37.62954,
-                                address = query,
+                            MapScreenEvent.OnSearchAddressRequested(
+                                query = query,
                                 isStartPoint = isStartPoint
                             )
                         )

@@ -19,6 +19,7 @@ class ExceptionHandler @Inject constructor() {
                     BusinessErrorCode.USER_ID_NOT_FOUND -> R.string.exception_msg_get_data
                     BusinessErrorCode.INCIDENT_NOT_FOUND -> R.string.exception_msg_incident_not_found
                     BusinessErrorCode.INVALID_BOUNDS -> R.string.exception_msg_get_data
+                    BusinessErrorCode.ADDRESS_NOT_FOUND -> R.string.exception_msg_get_address
                 }
             }
             is OperationResult.ErrorType.Network -> R.string.exception_msg_network

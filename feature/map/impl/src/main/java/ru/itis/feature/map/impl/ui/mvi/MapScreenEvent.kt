@@ -74,11 +74,9 @@ internal sealed interface MapScreenEvent {
     /** Завершение режима маршрута (очистка) */
     data object OnFinishRouteClicked : MapScreenEvent
 
-    /** Результат геокодинга адреса */
-    data class OnAddressGeocoded(
-        val latitude: Double,
-        val longitude: Double,
-        val address: String,
+    /** Пользователь запросил геокодинг адреса (ввод + кнопка) */
+    data class OnSearchAddressRequested(
+        val query: String,
         val isStartPoint: Boolean
     ) : MapScreenEvent
 }
