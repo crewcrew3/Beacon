@@ -65,6 +65,7 @@ dependencies {
     implementation(projects.feature.login.impl)
     implementation(projects.feature.signup.impl)
     implementation(projects.feature.profile.impl)
+    implementation(projects.feature.emergency.impl)
 
     //androidx
     implementation(libs.androidx.core.ktx)

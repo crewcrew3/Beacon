@@ -39,6 +39,7 @@
     <string name="login_screen_header">Войдите в существующий аккаунт, чтобы получить доступ к большему числу функций</string>
 
     <string name="profile_screen_tab_logout">Выйти</string>
+    <string name="profile_screen_tab_emergency">Экстренные инструменты</string>
     <string name="profile_screen_btn_text_login">Войти</string>
     <string name="profile_screen_btn_text_signup">Зарегистрироваться</string>
 
@@ -74,4 +75,17 @@
     <string name="btn_enter_route_mode">Построить маршрут</string>
     <string name="btn_collapse_route_panel">Свернуть</string>
     <string name="btn_expand_route_panel">Развернуть</string>
+
+    <string name="emergency_screen_title">Экстренные инструменты</string>
+    <string name="emergency_screen_btn_fake_call">Фейковый звонок</string>
+    <string name="emergency_screen_btn_siren_light">Сирена и вспышка</string>
+
+    <string name="emergency_fake_call_default_name">Крутой чел</string>
+    <string name="emergency_fake_call_btn_answer">Ответить</string>
+    <string name="emergency_fake_call_btn_decline">Сбросить</string>
+    <string name="emergency_fake_call_conversation_title">Разговор</string>
+    <string name="emergency_fake_call_conversation_finish">Завершить</string>
+
+    <string name="emergency_siren_title">ТРЕВОГА</string>
+    <string name="emergency_siren_btn_off">Выключить</string>
 </resources>

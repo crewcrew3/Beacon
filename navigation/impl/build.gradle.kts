@@ -42,6 +42,7 @@ dependencies {
     implementation(projects.feature.login.api)
     implementation(projects.feature.signup.api)
     implementation(projects.feature.profile.api)
+    implementation(projects.feature.emergency.api)
 
     implementation(libs.androidx.core.ktx)
     //DI

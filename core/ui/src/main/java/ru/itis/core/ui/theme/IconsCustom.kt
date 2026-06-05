@@ -20,6 +20,9 @@ object IconsCustom {
     fun tabLogOutIcon(): ImageVector = ImageVector.vectorResource(R.drawable.ic_logout)
 
     @Composable
+    fun tabEmergencyIcon(): ImageVector = ImageVector.vectorResource(R.drawable.ic_emergency)
+
+    @Composable
     fun visibilityIcon(): ImageVector = ImageVector.vectorResource(R.drawable.ic_visibility)
 
     @Composable

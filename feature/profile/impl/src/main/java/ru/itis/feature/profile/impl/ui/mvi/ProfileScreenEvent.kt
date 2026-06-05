@@ -6,4 +6,5 @@ internal sealed interface ProfileScreenEvent {
     data object OnLogInBtnClick : ProfileScreenEvent
     data object OnSignUpBtnClick : ProfileScreenEvent
     data object OnMapBottomBarClick : ProfileScreenEvent
+    data object OnEmergencyToolsClick : ProfileScreenEvent
 }
