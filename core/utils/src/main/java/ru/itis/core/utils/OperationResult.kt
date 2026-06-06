@@ -26,4 +26,11 @@ enum class BusinessErrorCode {
 
     //Map
     ADDRESS_NOT_FOUND,
+
+    // SOS errors
+    SOS_NO_CONTACTS,
+    SOS_PERMISSIONS_DENIED,
+    SOS_NO_COORDS,
+    SOS_SEND_FAILED,
+    SOS_SAVE_FAILED,
 }

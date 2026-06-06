@@ -12,6 +12,7 @@ import ru.itis.core.domain.repository.IncidentRepository
 import ru.itis.core.domain.repository.LightingPoleRepository
 import ru.itis.core.domain.repository.SafetyCameraRepository
 import ru.itis.core.domain.repository.SafetyPlaceRepository
+import ru.itis.core.domain.repository.SosSettingsRepository
 import ru.itis.core.domain.repository.UserRepository
 import ru.itis.data.impl.initializer.DataInitializerImpl
 import ru.itis.data.impl.local.storage.BasicUserDataStorageImpl
@@ -20,6 +21,7 @@ import ru.itis.data.impl.repository.IncidentRepositoryImpl
 import ru.itis.data.impl.repository.LightingPoleRepositoryImpl
 import ru.itis.data.impl.repository.SafetyCameraRepositoryImpl
 import ru.itis.data.impl.repository.SafetyPlaceRepositoryImpl
+import ru.itis.data.impl.repository.SosSettingsRepositoryImpl
 import ru.itis.data.impl.repository.UserRepositoryImpl
 import javax.inject.Singleton
 
@@ -58,4 +60,8 @@ internal interface DataBinderModule {
     @Binds
     @Reusable
     fun bindBasicUserDataStorageToImplementation(impl: BasicUserDataStorageImpl): BasicUserDataStorage
+
+    @Binds
+    @Reusable
+    abstract fun bindSosSettingsRepository(impl: SosSettingsRepositoryImpl): SosSettingsRepository
 }

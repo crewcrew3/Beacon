@@ -26,7 +26,7 @@ fun PrimaryButtonCustom(
         ),
         shape = buttonSettings.shape,
         enabled = buttonSettings.enabled,
-        modifier = Modifier
+        modifier = buttonSettings.modifier
             .fillMaxWidth()
             .height(buttonSettings.height)
     ) {

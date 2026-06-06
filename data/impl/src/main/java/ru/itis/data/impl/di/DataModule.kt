@@ -16,6 +16,8 @@ import ru.itis.data.impl.local.LocalDatabase
 import ru.itis.data.impl.local.dao.IncidentDao
 import ru.itis.data.impl.local.dao.LightingPoleDao
 import ru.itis.data.impl.local.dao.SafetyCameraDao
+import ru.itis.data.impl.local.dao.SosSettingsDao
+import ru.itis.data.impl.local.dao.TrustedContactDao
 import ru.itis.data.impl.local.dao.UserDao
 import ru.itis.data.impl.local.dao.VerificationActionDao
 import javax.inject.Singleton
@@ -40,7 +42,9 @@ class DataModule {
             context,
             LocalDatabase::class.java,
             dataConfig.DATABASE_NAME
-        ).build()
+        )
+            .fallbackToDestructiveMigration(true)
+            .build()
     }
 
     @Provides
@@ -71,5 +75,17 @@ class DataModule {
     @Singleton
     internal fun provideSafetyCameraDao(database: LocalDatabase): SafetyCameraDao {
         return database.safetyCameraDao
+    }
+
+    @Provides
+    @Singleton
+    internal fun provideSosSettingsDao(database: LocalDatabase): SosSettingsDao {
+        return database.sosSettingsDao
+    }
+
+    @Provides
+    @Singleton
+    internal fun provideTrustedContactDao(database: LocalDatabase): TrustedContactDao {
+        return database.trustedContactDao
     }
 }

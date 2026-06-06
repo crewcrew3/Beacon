@@ -1,4 +1,4 @@
-package ru.itis.feature.emergency.impl.ui.mvi
+package ru.itis.feature.emergency.impl.ui.emergency.mvi
 
 import androidx.annotation.StringRes
 

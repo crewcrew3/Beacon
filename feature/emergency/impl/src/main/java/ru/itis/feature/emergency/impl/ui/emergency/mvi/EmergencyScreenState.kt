@@ -1,4 +1,4 @@
-package ru.itis.feature.emergency.impl.ui.mvi
+package ru.itis.feature.emergency.impl.ui.emergency.mvi
 
 internal sealed interface EmergencyScreenState {
     data object Initial : EmergencyScreenState //начальный
