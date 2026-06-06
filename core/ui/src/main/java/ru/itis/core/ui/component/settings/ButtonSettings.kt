@@ -1,6 +1,7 @@
 package ru.itis.core.ui.component.settings
 
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.TextStyle
@@ -17,4 +18,5 @@ data class ButtonSettings(
     val shape: Shape = RoundedCornerShape(DimensionsCustom.roundedCorners),
     val height: Dp = DimensionsCustom.btnHeight,
     val textStyle: TextStyle = StylesCustom.basicBodyTextCenter,
+    val modifier: Modifier = Modifier
 )

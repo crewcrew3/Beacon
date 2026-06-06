@@ -19,6 +19,7 @@ import ru.itis.feature.profile.impl.ui.mvi.ProfileScreenEffect
 import ru.itis.feature.profile.impl.ui.mvi.ProfileScreenEvent
 import ru.itis.feature.profile.impl.ui.mvi.ProfileScreenState
 import ru.itis.navigation.api.BottomBarNavigator
+import ru.itis.navigation.api.EmergencyNavigator
 import ru.itis.navigation.api.ProfileNavigator
 
 import javax.inject.Inject
@@ -30,6 +31,7 @@ internal class ProfileViewModel @Inject constructor(
     private val logOutUseCase: LogOutUseCase,
     private val profileNavigator: ProfileNavigator,
     private val bottomBarNavigator: BottomBarNavigator,
+    private val emergencyNavigator: EmergencyNavigator,
     private val exceptionHandler: ExceptionHandler,
 ) : ViewModel() {
 
@@ -49,6 +51,7 @@ internal class ProfileViewModel @Inject constructor(
             is ProfileScreenEvent.OnLogInBtnClick -> profileNavigator.toLogInScreen()
             is ProfileScreenEvent.OnSignUpBtnClick -> profileNavigator.toSighUpScreen()
             is ProfileScreenEvent.OnMapBottomBarClick -> bottomBarNavigator.toMapScreen()
+            is ProfileScreenEvent.OnEmergencyToolsClick -> emergencyNavigator.toEmergencyScreen()
         }
     }
 

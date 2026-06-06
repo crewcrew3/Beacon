@@ -6,8 +6,10 @@ import dagger.Reusable
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import ru.itis.navigation.api.BottomBarNavigator
+import ru.itis.navigation.api.EmergencyNavigator
 import ru.itis.navigation.api.ProfileNavigator
 import ru.itis.navigation.impl.navigator.BottomBarNavigatorImpl
+import ru.itis.navigation.impl.navigator.EmergencyNavigatorImpl
 import ru.itis.navigation.impl.navigator.ProfileNavigatorImpl
 
 @Module
@@ -21,4 +23,8 @@ internal interface NavigationBinderModule {
     @Binds
     @Reusable
     fun bindProfileNavigatorToImplementation(impl: ProfileNavigatorImpl): ProfileNavigator
+
+    @Binds
+    @Reusable
+    fun bindEmergencyNavigatorToImplementation(impl: EmergencyNavigatorImpl): EmergencyNavigator
 }

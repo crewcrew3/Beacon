@@ -16,6 +16,11 @@
     <string name="exception_msg_get_address">Адрес не найден</string>
     <string name="exception_msg_log_out">Ошибка выхода из системы</string>
     <string name="exception_msg_incident_not_found">Такого инцидента не существует</string>
+    <string name="exception_msg_no_contacts">Список доверенных контактов пуст</string>
+    <string name="exception_msg_permissions_denied">Необходимые разрешения не предоставлены</string>
+    <string name="exception_msg_send_failed">Не удалось отправить SOS сообщение</string>
+    <string name="exception_msg_save_failed">Не удалось сохранить настройки</string>
+    <string name="exception_msg_no_coord">Текущее местоположение недоступно</string>
 
     <string name="placeholder_text_input">Введите</string>
     <string name="label_nickname">Никнейм</string>
@@ -39,6 +44,7 @@
     <string name="login_screen_header">Войдите в существующий аккаунт, чтобы получить доступ к большему числу функций</string>
 
     <string name="profile_screen_tab_logout">Выйти</string>
+    <string name="profile_screen_tab_emergency">Экстренные инструменты</string>
     <string name="profile_screen_btn_text_login">Войти</string>
     <string name="profile_screen_btn_text_signup">Зарегистрироваться</string>
 
@@ -74,4 +80,38 @@
     <string name="btn_enter_route_mode">Построить маршрут</string>
     <string name="btn_collapse_route_panel">Свернуть</string>
     <string name="btn_expand_route_panel">Развернуть</string>
+
+    <string name="emergency_screen_title">Экстренные инструменты</string>
+    <string name="emergency_screen_btn_fake_call">Фейковый звонок</string>
+    <string name="emergency_screen_btn_siren_light">Сирена и вспышка</string>
+
+    <string name="emergency_fake_call_default_name">Крутой чел</string>
+    <string name="emergency_fake_call_btn_answer">Ответить</string>
+    <string name="emergency_fake_call_btn_decline">Сбросить</string>
+    <string name="emergency_fake_call_conversation_title">Разговор</string>
+    <string name="emergency_fake_call_conversation_finish">Завершить</string>
+
+    <string name="emergency_siren_title">ТРЕВОГА</string>
+    <string name="emergency_siren_btn_off">Выключить</string>
+
+    <!-- SOS Settings -->
+    <string name="sos_settings_title">Настройки SOS</string>
+    <string name="sos_settings_message_label">Сообщение</string>
+    <string name="sos_settings_message_placeholder">Введите сообщение для SOS</string>
+    <string name="sos_settings_contacts_label">Доверенные контакты</string>
+    <string name="sos_settings_contacts_hint">Номера для отправки SMS при активации SOS</string>
+    <string name="sos_settings_phone_placeholder">+7XXXXXXXXXX</string>
+    <string name="sos_settings_btn_add">Добавить</string>
+    <string name="sos_settings_btn_save">Сохранить</string>
+    <string name="sos_settings_delete_contact">Удалить контакт</string>
+    <string name="sos_settings_saved">Настройки сохранены</string>
+    <string name="sos_settings_error_invalid_phone">Неверный формат номера. Используйте +7XXXXXXXXXX или 8XXXXXXXXXX</string>
+    <string name="sos_settings_error_duplicate_phone">Этот номер уже добавлен</string>
+
+    <!-- Emergency SOS -->
+    <string name="emergency_btn_sos">SOS</string>
+    <string name="emergency_sos_sent">SOS сообщение отправлено</string>
+    <string name="emergency_sos_no_contacts">Список доверенных контактов пуст. Настройте его в настройках.</string>
+    <string name="emergency_sos_permissions_denied">Разрешения не предоставлены</string>
+    <string name="emergency_sos_hold">Удерживайте для отправки SOS</string>
 </resources>

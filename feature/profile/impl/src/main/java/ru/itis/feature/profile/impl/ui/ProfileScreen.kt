@@ -198,6 +198,16 @@ internal fun ProfileScreen(
                             )
 
                             ProfileTab(
+                                tabIcon = IconsCustom.tabEmergencyIcon(),
+                                tabHeader = stringResource(R.string.profile_screen_tab_emergency),
+                                onClick = {
+                                    viewModel.processEvent(ProfileScreenEvent.OnEmergencyToolsClick)
+                                },
+                                textColor = MaterialTheme.colorScheme.error,
+                                iconColor = MaterialTheme.colorScheme.error,
+                            )
+
+                            ProfileTab(
                                 tabIcon = IconsCustom.tabLogOutIcon(),
                                 tabHeader = stringResource(R.string.profile_screen_tab_logout),
                                 onClick = {
